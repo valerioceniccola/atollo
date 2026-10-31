@@ -29,10 +29,11 @@ if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then fail "La Release 
 xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1 \
     || fail "Manca il profilo di notarizzazione \"$NOTARY_PROFILE\" (vedi docs/RELEASING.md)."
 
+# La Release punta a main su GitHub: dev'esserci e coincidere con questo commit (anche la prima volta).
 git fetch -q origin main 2>/dev/null || true
-if git rev-parse -q --verify origin/main >/dev/null && [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
+if ! git rev-parse -q --verify origin/main >/dev/null || [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/main)" ]; then
     step "Push di main su GitHub"
-    git push origin main
+    git push -u origin main
 fi
 
 rm -rf "$OUT"; mkdir -p "$OUT"
