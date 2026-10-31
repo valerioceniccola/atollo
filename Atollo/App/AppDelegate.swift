@@ -18,8 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var colors = EqualizerColorProvider(settings: settings)
     private lazy var mediaKeys = MediaKeyInterceptor(controller: spotify, settings: settings)
     private let permissions = PermissionsCenter()
+    private let updater = Updater()
     private lazy var settingsWindow = SettingsWindowController { [unowned self] in
-        SettingsView(nowPlaying: spotify.state, settings: settings, colors: colors, permissions: permissions)
+        SettingsView(nowPlaying: spotify.state, settings: settings, colors: colors, permissions: permissions,
+                     updater: updater)
     }
     private lazy var onboarding = OnboardingWindowController(permissions: permissions) { [unowned self] in
         UserDefaults.standard.set(true, forKey: SettingsKey.didCompleteOnboarding)

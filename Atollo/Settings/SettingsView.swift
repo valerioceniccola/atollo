@@ -10,11 +10,13 @@ struct SettingsView: View {
     @State private var loginError: String?
     private let colors: EqualizerColorProvider?
     private let permissions: PermissionsCenter
+    private let updater: Updater?
 
     init(nowPlaying: NowPlayingState, settings: AppSettings, colors: EqualizerColorProvider?,
-         permissions: PermissionsCenter) {
+         permissions: PermissionsCenter, updater: Updater?) {
         self.colors = colors
         self.permissions = permissions
+        self.updater = updater
         let model = IslandModel(geometry: .studioDisplay,
                                 nowPlaying: nowPlaying.track == nil ? .sample() : nowPlaying,
                                 settings: settings, colors: colors)
@@ -49,6 +51,10 @@ struct SettingsView: View {
                 if let loginError {
                     Text(loginError).font(.footnote).foregroundStyle(.red)
                 }
+            }
+
+            if let updater {
+                UpdatesSection(updater: updater)
             }
         }
         .formStyle(.grouped)
@@ -152,5 +158,28 @@ private struct ColorSwatch: View {
 }
 
 #Preview {
-    SettingsView(nowPlaying: .sample(), settings: AppSettings(), colors: nil, permissions: PermissionsCenter())
+    SettingsView(nowPlaying: .sample(), settings: AppSettings(), colors: nil, permissions: PermissionsCenter(),
+                 updater: nil)
+}
+
+/// Versione installata e aggiornamenti.
+private struct UpdatesSection: View {
+    @Bindable var updater: Updater
+
+    var body: some View {
+        Section {
+            LabeledContent("Versione", value: Updater.currentVersion)
+            Toggle("Controlla gli aggiornamenti automaticamente", isOn: $updater.automaticallyChecks)
+            LabeledContent("Aggiornamenti") {
+                Button("Controlla ora…") { updater.checkForUpdates() }
+                    .disabled(!updater.canCheckForUpdates)
+            }
+        } header: {
+            Text("Aggiornamenti")
+        } footer: {
+            Text("Le versioni nuove arrivano dalle Release di GitHub, con le novità.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+    }
 }
