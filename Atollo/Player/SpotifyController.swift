@@ -38,6 +38,7 @@ final class SpotifyController {
     let source: PlayerSource
 
     private let artworkLoader = ArtworkLoader()
+    private var pendingPause: Task<Void, Never>?
 
     init(source: PlayerSource = SpotifySource()) {
         self.source = source
@@ -53,6 +54,7 @@ final class SpotifyController {
 
     func playPause() {
         // Risposta immediata nella UI; la notifica di Spotify conferma subito dopo.
+        pendingPause?.cancel()
         if state.isPlaying {
             state.status = .paused
         } else if state.track != nil {
@@ -65,26 +67,50 @@ final class SpotifyController {
     func previousTrack() { source.previousTrack() }
 
     var shareURL: URL? { state.track.flatMap(source.shareURL(for:)) }
+    func activateSpotify() { source.activateApp() }
 
     // MARK: Aggiornamenti
 
     private func apply(_ snapshot: PlayerSnapshot?) {
         guard let snapshot else {
+            // Spotify chiuso: l'isola sparisce con l'ultimo brano ancora scritto sopra,
+            // invece di passare un attimo al nome di ripiego.
+            pendingPause?.cancel()
             state.isRunning = false
             state.status = .stopped
-            state.track = nil
-            state.artwork = nil
             state.isPresentable = false
             return
         }
 
         state.isRunning = true
-        if state.track?.uri != snapshot.track?.uri || state.track?.artworkURL != snapshot.track?.artworkURL {
-            loadArtwork(for: snapshot.track)
+        applyStatus(snapshot.status)
+        // "Fermo, nessun brano" arriva anche mentre Spotify si sta chiudendo: si tiene l'ultimo brano.
+        guard let track = snapshot.track else {
+            updatePresentable()
+            return
         }
-        state.track = snapshot.track
-        state.status = snapshot.status
+        if state.track?.uri != track.uri || state.track?.artworkURL != track.artworkURL {
+            loadArtwork(for: track)
+        }
+        state.track = track
         updatePresentable()
+    }
+
+    /// Al cambio brano Spotify manda "In pausa" e subito dopo "In riproduzione": una pausa
+    /// vale solo se dura, così l'isola non passa per un istante allo stato di pausa.
+    private func applyStatus(_ status: PlaybackStatus) {
+        pendingPause?.cancel()
+        pendingPause = nil
+        guard status == .paused, state.isPlaying else {
+            state.status = status
+            return
+        }
+        pendingPause = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(Theme.Motion.pauseConfirmDelay))
+            guard let self, !Task.isCancelled else { return }
+            self.state.status = .paused
+            self.pendingPause = nil
+        }
     }
 
     /// L'isola resta visibile finché Spotify è aperto; in pausa l'equalizzatore si spegne.

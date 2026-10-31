@@ -49,8 +49,8 @@ final class MediaKeyInterceptor {
     private func enable() {
         guard tap == nil else { return }
         Log.mediaKeys.info("enable, trusted=\(AccessibilityPermission.isTrusted, privacy: .public)")
+        // Nessuna richiesta da qui: il permesso si concede dalla schermata di intro o dalle Impostazioni.
         guard AccessibilityPermission.isTrusted else {
-            AccessibilityPermission.requestIfNeeded()
             waitForTrust()
             return
         }
@@ -137,39 +137,4 @@ nonisolated private func mediaKeyCallback(proxy: CGEventTapProxy, type: CGEventT
     let interceptor = Unmanaged<MediaKeyInterceptor>.fromOpaque(userInfo).takeUnretainedValue()
     // Il tap è sul run loop principale.
     return MainActor.assumeIsolated { interceptor.handle(type: type, event: event) }
-}
-
-enum AccessibilityPermission {
-    static var isTrusted: Bool { AXIsProcessTrusted() }
-
-    /// Prima di mostrare la richiesta di sistema, spiega a cosa serve (una volta sola).
-    static func requestIfNeeded() {
-        guard !isTrusted else { return }
-        let defaults = UserDefaults.standard
-        if !defaults.bool(forKey: SettingsKey.didExplainAccessibility) {
-            defaults.set(true, forKey: SettingsKey.didExplainAccessibility)
-            let alert = NSAlert()
-            alert.messageText = "Atollo vorrebbe usare i tasti multimediali"
-            alert.informativeText = """
-            Per mandare play/pausa, avanti e indietro della tastiera solo a Spotify, Atollo deve \
-            poter leggere quei tasti. Serve il permesso Accessibilità: Atollo guarda solo i tasti \
-            multimediali, mai quello che scrivi.
-
-            Nella prossima finestra scegli "Apri Impostazioni di Sistema" e attiva Atollo in \
-            Privacy e sicurezza → Accessibilità. Puoi anche spegnere la funzione nelle impostazioni di Atollo.
-            """
-            alert.addButton(withTitle: "Continua")
-            alert.addButton(withTitle: "Non ora")
-            NSApp.activate()
-            guard alert.runModal() == .alertFirstButtonReturn else { return }
-        }
-        let options = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(options)
-    }
-
-    static func openSystemSettings() {
-        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
-            NSWorkspace.shared.open(url)
-        }
-    }
 }

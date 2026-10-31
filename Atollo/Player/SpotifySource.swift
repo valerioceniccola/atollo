@@ -67,6 +67,14 @@ final class SpotifySource: PlayerSource {
     func nextTrack() { bridge.perform { $0.nextTrack?() } }
     func previousTrack() { bridge.perform { $0.previousTrack?() } }
 
+    func activateApp() {
+        if let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
+            app.activate()
+        } else if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) {
+            NSWorkspace.shared.openApplication(at: url, configuration: .init())
+        }
+    }
+
     func shareURL(for track: TrackInfo) -> URL? {
         Self.openSpotifyURL(fromURI: track.uri)
     }
@@ -137,9 +145,9 @@ nonisolated private final class SpotifyBridge: @unchecked Sendable {
             artworkURL: track.artworkUrl.flatMap { URL(string: $0) },
             uri: track.spotifyUrl ?? ""
         )
-        // Brano non ancora caricato: meglio non mostrare un'isola vuota.
-        guard !info.title.isEmpty || !info.uri.isEmpty else {
-            return PlayerSnapshot(status: .stopped, track: nil)
+        // Brano non ancora caricato: si tiene il precedente invece di mostrare un titolo vuoto.
+        guard !info.title.isEmpty else {
+            return PlayerSnapshot(status: status, track: nil)
         }
         return PlayerSnapshot(status: status, track: info)
     }

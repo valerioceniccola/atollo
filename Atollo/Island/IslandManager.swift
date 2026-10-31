@@ -10,7 +10,7 @@ final class IslandManager {
 
     private var islands: [CGDirectDisplayID: IslandWindowController] = [:]
     private let anchor = MenuBarAnchor()
-    private var monitors: [Any] = []
+    private var isStarted = false
     private var screenObserver: NSObjectProtocol?
 
     init(controller: SpotifyController, settings: AppSettings, colors: EqualizerColorProvider,
@@ -28,7 +28,9 @@ final class IslandManager {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.rebuildIslands() }
         }
-        installMonitors()
+        anchor.onRightClick = { [weak self] button in self?.showMenu(at: button) }
+        anchor.onLeftClick = { [weak self] in self?.controller.activateSpotify() }
+        isStarted = true
         observeAnchor()
     }
 
@@ -77,35 +79,12 @@ final class IslandManager {
             island.invalidate()
             islands[id] = nil
         }
-        if !monitors.isEmpty { updateAnchor() }
-    }
-
-    private func island(for window: NSWindow?) -> IslandWindowController? {
-        islands.values.first { $0.panel === window }
-    }
-
-    // MARK: Eventi
-
-    /// L'isola si usa solo col click destro: il menu.
-    private func installMonitors() {
-        if let monitor = NSEvent.addLocalMonitorForEvents(matching: .rightMouseDown, handler: { [weak self] event in
-            // I monitor locali girano sul main thread.
-            nonisolated(unsafe) let event = event
-            let consumed = MainActor.assumeIsolated { self?.handleRightClick(event) ?? false }
-            return consumed ? nil : event
-        }) { monitors.append(monitor) }
-    }
-
-    /// `true` se il click era sull'isola ed è stato mostrato il menu.
-    private func handleRightClick(_ event: NSEvent) -> Bool {
-        guard let island = island(for: event.window), island.model.presentation != .hidden else { return false }
-        showMenu(for: event, in: island)
-        return true
+        if isStarted { updateAnchor() }
     }
 
     // MARK: Menu del click destro
 
-    private func showMenu(for event: NSEvent, in island: IslandWindowController) {
+    private func showMenu(at button: NSStatusBarButton) {
         let menu = NSMenu()
         let copy = NSMenuItem(title: "Copia link del brano", action: #selector(MenuTarget.copyLink), keyEquivalent: "")
         copy.isEnabled = controller.shareURL != nil
@@ -125,8 +104,8 @@ final class IslandManager {
         // Il target va tenuto vivo finché il menu è aperto.
         objc_setAssociatedObject(menu, &MenuTarget.key, target, .OBJC_ASSOCIATION_RETAIN)
 
-        guard let view = island.panel.contentView else { return }
-        menu.popUp(positioning: nil, at: view.convert(event.locationInWindow, from: nil), in: view)
+        // Sotto l'isola, allineato al suo bordo sinistro, come i menu delle altre icone.
+        menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
     }
 }
 

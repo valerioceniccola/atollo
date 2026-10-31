@@ -92,26 +92,30 @@ final class IslandModel {
     func shapeSize(for presentation: Presentation) -> CGSize {
         let height = geometry.capsuleHeight
         switch presentation {
-        case .hidden: return CGSize(width: height, height: height)
-        case .visible: return CGSize(width: closedWidth, height: height)
+        // Nascosta ha la stessa forma: compare e sparisce solo in dissolvenza.
+        case .hidden, .visible: return CGSize(width: closedWidth, height: height)
         }
     }
 
-    /// Dimensione della finestra che contiene l'isola, compresi i margini.
-    func windowSize(for presentation: Presentation) -> CGSize {
-        let shape = shapeSize(for: presentation)
+    /// Dimensione fissa della finestra: ci sta l'isola più larga, con i margini.
+    var windowSize: CGSize {
         let margin = Theme.Island.windowMargin
         return CGSize(
-            width: (shape.width + 2 * margin).rounded(.up),
-            height: (geometry.topInset + shape.height + margin).rounded(.up)
+            width: (Theme.Capsule.maxWidth + 2 * margin).rounded(.up),
+            height: (geometry.topInset + geometry.capsuleHeight + margin).rounded(.up)
         )
     }
 
-    /// Larghezza della capsula chiusa: segue il testo tra la minima e la massima.
+    /// In pausa (o senza brano) l'isola si stringe a copertina e barre.
+    var isCompact: Bool { !nowPlaying.isPlaying || nowPlaying.track == nil }
+
+    /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo tra la minima e la massima.
     var closedWidth: CGFloat {
-        let height = geometry.capsuleHeight
-        let padding = (height - Theme.Capsule.artSize) / 2 + 1
-        let fixed = 2 * padding + Theme.Capsule.artSize + EqualizerView.width + 2 * Theme.Capsule.itemSpacing
+        let padding = 2 * geometry.contentInset + Theme.Capsule.extraLeadingInset + Theme.Capsule.extraTrailingInset
+        if isCompact {
+            return (padding + Theme.Capsule.artSize + Theme.Capsule.itemSpacing + EqualizerView.width).rounded(.up)
+        }
+        let fixed = padding + Theme.Capsule.artSize + EqualizerView.width + 2 * Theme.Capsule.itemSpacing
         let ideal = fixed + textWidth + Theme.Marquee.fadeWidth / 2
         return ideal.clamped(to: Theme.Capsule.minWidth...Theme.Capsule.maxWidth).rounded(.up)
     }

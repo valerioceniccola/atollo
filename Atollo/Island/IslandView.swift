@@ -11,6 +11,7 @@ struct IslandView: View {
         let size = model.renderedShapeSize
         let height = model.geometry.capsuleHeight
         let shape = Capsule(style: .continuous)
+        let isPlaying = model.nowPlaying.isPlaying
 
         HStack(spacing: Theme.Capsule.itemSpacing) {
             Group {
@@ -22,29 +23,29 @@ struct IslandView: View {
                 }
                 .animation(Theme.Motion.artworkChange, value: model.artworkID)
 
-                ZStack {
-                    MarqueeText { TrackLineText(title: model.title, artist: model.artist) }
-                        .id(model.trackID)
-                        .transition(Theme.Motion.trackTextTransition)
+                // In pausa l'isola è compatta: niente testo, solo copertina e barre spente, affiancate.
+                if !model.isCompact {
+                    ZStack {
+                        MarqueeText { TrackLineText(title: model.title, artist: model.artist) }
+                            .id(model.trackID)
+                            .transition(Theme.Motion.trackTextTransition)
+                    }
+                    .clipped()
+                    .animation(Theme.Motion.trackChange, value: model.trackID)
+                    .transition(.opacity.animation(Theme.Motion.compactText))
                 }
-                .clipped()
-                .animation(Theme.Motion.trackChange, value: model.trackID)
             }
-            .opacity(model.nowPlaying.isPlaying ? 1 : Theme.Island.pausedContentOpacity)
-            .animation(Theme.Motion.pause, value: model.nowPlaying.isPlaying)
 
-            EqualizerView(isPlaying: model.nowPlaying.isPlaying,
-                          color: model.equalizerColor, height: Theme.Equalizer.height)
+            EqualizerView(isPlaying: isPlaying, color: model.equalizerColor, height: Theme.Equalizer.height)
         }
-        .padding(.horizontal, (height - Theme.Capsule.artSize) / 2 + 1)
+        .padding(.leading, model.geometry.contentInset + Theme.Capsule.extraLeadingInset)
+        .padding(.trailing, model.geometry.contentInset + Theme.Capsule.extraTrailingInset)
         .frame(width: size.width, height: height)
-        // Il vetro da solo è troppo chiaro sopra sfondi luminosi: sotto c'è un velo nero.
+        .animation(Theme.Motion.pause, value: isPlaying)
+        // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.
         .background(Theme.Island.backdrop, in: shape)
         .glassEffect(.regular.tint(Theme.Island.glassTint), in: shape)
         .clipShape(shape)
-        .opacity(model.nowPlaying.isPlaying ? 1 : Theme.Island.pausedOpacity)
-        .animation(Theme.Motion.pause, value: model.nowPlaying.isPlaying)
-        .scaleEffect(presentation == .hidden ? Theme.Island.hiddenScale : 1, anchor: .center)
         .opacity(presentation == .hidden ? 0 : 1)
         .offset(x: model.renderedOffsetX)
         .padding(.top, model.geometry.topInset)
@@ -67,7 +68,7 @@ private struct IslandPreview: View {
     }
 
     var body: some View {
-        let window = model.windowSize(for: .visible)
+        let window = model.windowSize
         ZStack(alignment: .top) {
             LinearGradient(colors: [.indigo, .teal], startPoint: .topLeading, endPoint: .bottomTrailing)
             Rectangle().fill(.black.opacity(0.25))
@@ -92,7 +93,7 @@ private struct IslandPreview: View {
                   artist: "Julie Andrews, Dick Van Dyke")
 }
 
-#Preview("In pausa") {
+#Preview("In pausa (compatta)") {
     IslandPreview(.studioDisplay, .visible, status: .paused)
 }
 

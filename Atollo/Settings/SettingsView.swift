@@ -7,12 +7,14 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
 
     @State private var previewModel: IslandModel
-    @State private var isAccessibilityTrusted = AccessibilityPermission.isTrusted
     @State private var loginError: String?
     private let colors: EqualizerColorProvider?
+    private let permissions: PermissionsCenter
 
-    init(nowPlaying: NowPlayingState, settings: AppSettings, colors: EqualizerColorProvider?) {
+    init(nowPlaying: NowPlayingState, settings: AppSettings, colors: EqualizerColorProvider?,
+         permissions: PermissionsCenter) {
         self.colors = colors
+        self.permissions = permissions
         let model = IslandModel(geometry: .studioDisplay,
                                 nowPlaying: nowPlaying.track == nil ? .sample() : nowPlaying,
                                 settings: settings, colors: colors)
@@ -22,16 +24,13 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Permessi") {
+                PermissionsList(center: permissions)
+                    .padding(.vertical, 4)
+            }
+
             Section {
                 Toggle("Tasti multimediali solo per Spotify", isOn: $mediaKeysOnlySpotify)
-                if mediaKeysOnlySpotify, !isAccessibilityTrusted {
-                    LabeledContent {
-                        Button("Apri Impostazioni…") { AccessibilityPermission.openSystemSettings() }
-                    } label: {
-                        Label("Serve il permesso Accessibilità", systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                    }
-                }
             } footer: {
                 Text("Play/pausa, avanti e indietro della tastiera vanno solo a Spotify quando è aperto. I comandi di AirPods e cuffie Bluetooth arrivano già all'app in riproduzione e non vengono intercettati.")
                     .font(.footnote)
@@ -58,10 +57,6 @@ struct SettingsView: View {
         .onChange(of: openAtLogin) { _, enabled in setOpenAtLogin(enabled) }
         .onAppear {
             openAtLogin = SMAppService.mainApp.status == .enabled
-            isAccessibilityTrusted = AccessibilityPermission.isTrusted
-        }
-        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { _ in
-            isAccessibilityTrusted = AccessibilityPermission.isTrusted
         }
     }
 
@@ -157,5 +152,5 @@ private struct ColorSwatch: View {
 }
 
 #Preview {
-    SettingsView(nowPlaying: .sample(), settings: AppSettings(), colors: nil)
+    SettingsView(nowPlaying: .sample(), settings: AppSettings(), colors: nil, permissions: PermissionsCenter())
 }

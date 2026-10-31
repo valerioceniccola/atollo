@@ -8,7 +8,9 @@ struct ArtworkView: View {
     let radius: CGFloat
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: radius, style: .continuous)
+        // Raggio pari a metà lato: cerchio vero (lo stile continuo lo deformerebbe).
+        let shape = RoundedRectangle(cornerRadius: min(radius, size / 2),
+                                     style: radius >= size / 2 ? .circular : .continuous)
         Group {
             if let image {
                 Image(nsImage: image)

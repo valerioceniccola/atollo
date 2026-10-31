@@ -17,6 +17,10 @@ nonisolated enum Theme {
         /// Quanto aspettare, dopo un'animazione di chiusura, prima di restringere la finestra.
         static let windowShrinkDelay: TimeInterval = 0.6
 
+        /// Comparsa e scomparsa (Spotify aperto o chiuso): dissolvenza morbida, sul posto.
+        static let fadeDuration: TimeInterval = 0.2
+        static var fade: Animation { .easeInOut(duration: fadeDuration) }
+
         /// Cambio brano: la copertina si dissolve nella nuova; il testo vecchio svanisce sul posto
         /// e il nuovo affiora con una leggera sfocatura e uno spostamento di pochi punti.
         static var trackChange: Animation { .easeInOut(duration: 0.4) }
@@ -29,6 +33,10 @@ nonisolated enum Theme {
             )
         }
         static var pause: Animation { .easeInOut(duration: 0.3) }
+        /// Il testo sparisce in fretta quando l'isola si fa compatta.
+        static var compactText: Animation { .easeInOut(duration: 0.2) }
+        /// Quanto deve durare una pausa per essere mostrata (al cambio brano Spotify ne manda una finta).
+        static let pauseConfirmDelay: TimeInterval = 0.6
     }
 
     // MARK: Isola (comune)
@@ -36,15 +44,9 @@ nonisolated enum Theme {
     enum Island {
         /// Vetro nativo (Liquid Glass) scurito, con un velo nero sotto per la leggibilità.
         static let glassTint = Color.black.opacity(0.7)
-        static let backdrop = Color.black.opacity(0.55)
+        static let backdrop = Color.black.opacity(0.9)
         /// Margine trasparente attorno all'isola nella finestra.
         static let windowMargin: CGFloat = 4
-        /// In pausa tutta l'isola si fa appena più discreta.
-        static let pausedOpacity: Double = 0.82
-        /// In pausa copertina e testo si attenuano.
-        static let pausedContentOpacity: Double = 0.55
-        /// Scala dell'isola nascosta (compare crescendo dal suo centro).
-        static let hiddenScale: CGFloat = 0.6
     }
 
     // MARK: Capsula nella barra dei menu
@@ -60,14 +62,22 @@ nonisolated enum Theme {
         /// Si adatta al testo tra queste due misure; oltre, il testo scorre.
         static let minWidth: CGFloat = 200
         static let maxWidth: CGFloat = 300
-        /// Spazio lasciato attorno all'isola tra le altre icone della barra dei menu.
-        static let menuBarItemPadding: CGFloat = 4
+        /// Spazio extra attorno all'isola nella barra dei menu: zero, basta la spaziatura di sistema tra le icone.
+        static let menuBarItemPadding: CGFloat = 0
+        /// Attesa, dopo l'ultimo movimento, prima di leggere la posizione dell'elemento nella barra dei menu.
+        static let menuBarSettleDelay: TimeInterval = 0.3
         /// Distanza minima dai bordi dello schermo.
         static let screenEdgeInset: CGFloat = 8
 
         static let artSize: CGFloat = 14
-        static let artRadius: CGFloat = 4
+        /// Copertina circolare: con lo stesso margine sopra, sotto e a sinistra è concentrica
+        /// con l'estremità della capsula.
+        static let artRadius: CGFloat = artSize / 2
         static let itemSpacing: CGFloat = 7
+        /// Margine aggiuntivo ai lati del contenuto, oltre a quello della copertina:
+        /// appena un filo a sinistra, un po' di più a destra dopo l'equalizzatore.
+        static let extraLeadingInset: CGFloat = 0.5
+        static let extraTrailingInset: CGFloat = 3
 
     }
 
@@ -118,6 +128,8 @@ nonisolated enum Theme {
         static let primaryText = Color.white
         static let secondaryText = Color.white.opacity(0.7)
         static let artworkPlaceholder = Color.white.opacity(0.14)
+
+
     }
 
     // MARK: Colore dell'equalizzatore (automatico)
@@ -134,6 +146,17 @@ nonisolated enum Theme {
         /// Controllo periodico dello sfondo (non esiste una notifica pubblica).
         static let wallpaperPollInterval: TimeInterval = 15
         static let swatchSize: CGFloat = 20
+    }
+
+    // MARK: Schermata di intro
+
+    enum Onboarding {
+        static let width: CGFloat = 500
+        static let padding: CGFloat = 32
+        static let cardPadding: CGFloat = 18
+        static let logoSize: CGFloat = 96
+        static let iconSize: CGFloat = 28
+        static let rowSpacing: CGFloat = 16
     }
 
     // MARK: Impostazioni

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- La capsula nera dell'isola, con un filo chiaro sul bordo. -->
+  <rect x="152" y="392" width="720" height="240" rx="120" fill="#000000"/>
+  <rect x="155" y="395" width="714" height="234" rx="117" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="6"/>
+</svg>

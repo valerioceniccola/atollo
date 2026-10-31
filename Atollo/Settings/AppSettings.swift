@@ -5,7 +5,8 @@ enum SettingsKey {
     static let mediaKeysOnlySpotify = "mediaKeysOnlySpotify"
     static let equalizerColor = "equalizerColor"
     static let openAtLogin = "openAtLogin"
-    static let didExplainAccessibility = "didExplainAccessibility"
+    static let didPromptAccessibility = "didPromptAccessibility"
+    static let didCompleteOnboarding = "didCompleteOnboarding"
 }
 
 enum EqualizerColorChoice: String, CaseIterable, Identifiable {

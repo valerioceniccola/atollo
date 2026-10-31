@@ -1,4 +1,5 @@
 import AppKit
+import Observation
 
 @main
 enum AtolloMain {
@@ -16,9 +17,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var spotify = SpotifyController()
     private lazy var colors = EqualizerColorProvider(settings: settings)
     private lazy var mediaKeys = MediaKeyInterceptor(controller: spotify, settings: settings)
+    private let permissions = PermissionsCenter()
     private lazy var settingsWindow = SettingsWindowController { [unowned self] in
-        SettingsView(nowPlaying: spotify.state, settings: settings, colors: colors)
+        SettingsView(nowPlaying: spotify.state, settings: settings, colors: colors, permissions: permissions)
     }
+    private lazy var onboarding = OnboardingWindowController(permissions: permissions) { [unowned self] in
+        UserDefaults.standard.set(true, forKey: SettingsKey.didCompleteOnboarding)
+        startSpotify()
+    }
+    private var didStartSpotify = false
     private lazy var islands = IslandManager(
         controller: spotify, settings: settings, colors: colors,
         openSettings: { [unowned self] in settingsWindow.show() }
@@ -26,10 +33,35 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.mainMenu = Self.makeMainMenu()
-        spotify.start()
         colors.start()
         islands.start()
         mediaKeys.start()
+
+        // Al primo avvio prima la schermata di intro: nessuna finestra di sistema a sorpresa.
+        // Il primo Apple Event a Spotify farebbe comparire la richiesta di Automazione.
+        if UserDefaults.standard.bool(forKey: SettingsKey.didCompleteOnboarding) {
+            startSpotify()
+        } else {
+            onboarding.show()
+            startSpotifyWhenAllowed()
+        }
+    }
+
+    /// Se il permesso per Spotify c'è già (o arriva dall'intro), l'isola parte subito,
+    /// senza aspettare "Inizia": non c'è più nessuna finestra di sistema da evitare.
+    private func startSpotifyWhenAllowed() {
+        guard !didStartSpotify else { return }
+        withObservationTracking {
+            if permissions.automation == .granted { startSpotify() }
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.startSpotifyWhenAllowed() }
+        }
+    }
+
+    private func startSpotify() {
+        guard !didStartSpotify else { return }
+        didStartSpotify = true
+        spotify.start()
     }
 
     /// Senza Dock né barra dei menu: riaprire l'app dal Finder mostra le impostazioni.

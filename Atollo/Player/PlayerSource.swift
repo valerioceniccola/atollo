@@ -36,4 +36,6 @@ protocol PlayerSource: AnyObject {
 
     /// Link condivisibile del brano (es. `https://open.spotify.com/track/…`).
     func shareURL(for track: TrackInfo) -> URL?
+    /// Porta in primo piano l'app del player.
+    func activateApp()
 }
