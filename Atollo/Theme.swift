@@ -125,17 +125,49 @@ nonisolated enum Theme {
 
     // MARK: Colori
 
-    enum Colors {
-        static let primaryText = Color.white
-        static let secondaryText = Color.white.opacity(0.7)
-        static let artworkPlaceholder = Color.white.opacity(0.14)
+    /// Colori dell'isola nei due aspetti: scuro (vetro nero, testo bianco) e chiaro (vetro chiaro, testo scuro).
+    struct Palette: Equatable {
+        var primaryText: Color
+        var secondaryText: Color
+        var artworkPlaceholder: Color
+        var backdrop: Color
+        var glassTint: Color
+        /// Vetro trasparente (`Glass.clear`) invece di quello normale.
+        var clearGlass: Bool
+        /// Filo sul bordo della capsula.
+        var stroke: Color
+        var colorScheme: ColorScheme
 
+        static let dark = Palette(
+            primaryText: .white,
+            secondaryText: .white.opacity(0.7),
+            artworkPlaceholder: .white.opacity(0.14),
+            backdrop: Island.backdrop,
+            glassTint: Island.glassTint,
+            clearGlass: false,
+            stroke: .clear,
+            colorScheme: .dark
+        )
 
+        static let light = Palette(
+            primaryText: Color(red: 0.11, green: 0.11, blue: 0.12),
+            secondaryText: Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.6),
+            artworkPlaceholder: .black.opacity(0.1),
+            // Solo vetro smerigliato, senza velo né tinta, con un filo sul bordo.
+            backdrop: .clear,
+            glassTint: .clear,
+            clearGlass: false,
+            stroke: .black.opacity(0.08),
+            colorScheme: .light
+        )
     }
 
     // MARK: Colore dell'equalizzatore (automatico)
 
     enum EqualizerColor {
+        /// Sull'isola chiara il colore va scurito per restare leggibile.
+        static let lightMaxLightness: Double = 0.58
+        static let lightMinChroma: Double = 0.1
         static let minLightness: Double = 0.75
         static let minChroma: Double = 0.08
         static let maxChroma: Double = 0.16

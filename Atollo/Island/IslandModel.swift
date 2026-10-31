@@ -82,8 +82,15 @@ final class IslandModel {
     var artworkID: ObjectIdentifier? { nowPlaying.artwork.map(ObjectIdentifier.init) }
     var artist: String { nowPlaying.track?.artist ?? "" }
 
+    var palette: Theme.Palette { settings.islandAppearance.palette }
+
     var equalizerColor: Color {
-        colors?.color(for: geometry.displayID) ?? Color(nsColor: EqualizerColorChoice.blue.presetColor ?? .systemBlue)
+        let color = colors?.nsColor(for: geometry.displayID) ?? EqualizerColorChoice.blue.presetColor ?? .systemBlue
+        guard settings.islandAppearance == .light, var oklch = OKLCH(color) else { return Color(nsColor: color) }
+        // I colori pensati per il nero sono chiari: sull'isola chiara si scuriscono, stessa tinta.
+        oklch.l = min(oklch.l, Theme.EqualizerColor.lightMaxLightness)
+        oklch.c = max(oklch.c, Theme.EqualizerColor.lightMinChroma)
+        return Color(nsColor: oklch.nsColor)
     }
 
 

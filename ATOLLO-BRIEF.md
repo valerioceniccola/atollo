@@ -24,7 +24,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 
 ## UI — l'isola
 - **Sempre nella barra dei menu, a sinistra delle altre icone.** Non imita il notch. Un `NSStatusItem` vuoto riserva lo spazio; l'isola è un pannello overlay (NSPanel non attivante, sopra la barra dei menu) agganciato al **bordo destro** di quell'elemento, così cambiando larghezza cresce solo verso sinistra con una sola animazione.
-- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo.
+- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo. In Impostazioni › Aspetto › Isola c'è anche un aspetto **chiaro**: solo vetro normale di macOS, senza velo né tinta, con un filo scuro all'8% sul bordo, testo scuro ed equalizzatore scurito (stessa tinta). Default: scuro.
 - Lo spazio nella barra lo riserva un `NSStatusItem` largo esattamente quanto l'isola (attorno solo la spaziatura di sistema); la posizione si legge dal pulsante dell'elemento, non dalla sua finestra, e solo a barra ferma.
 - **Visibile finché Spotify è aperto**, anche in pausa; sparisce quando Spotify si chiude. Compare e sparisce con un'animazione.
 - Visibile anche a schermo intero e durante la condivisione dello schermo.

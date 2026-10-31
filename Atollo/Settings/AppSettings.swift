@@ -4,9 +4,22 @@ import Observation
 enum SettingsKey {
     static let mediaKeysOnlySpotify = "mediaKeysOnlySpotify"
     static let equalizerColor = "equalizerColor"
+    static let islandAppearance = "islandAppearance"
     static let openAtLogin = "openAtLogin"
     static let didPromptAccessibility = "didPromptAccessibility"
     static let didCompleteOnboarding = "didCompleteOnboarding"
+}
+
+enum IslandAppearance: String, CaseIterable, Identifiable {
+    case dark, light
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .dark: "Scuro"
+        case .light: "Chiaro"
+        }
+    }
+    var palette: Theme.Palette { self == .dark ? .dark : .light }
 }
 
 enum EqualizerColorChoice: String, CaseIterable, Identifiable {
@@ -66,6 +79,7 @@ extension NSColor {
 final class AppSettings {
     private(set) var mediaKeysOnlySpotify = true
     private(set) var equalizerColor = EqualizerColorChoice.automatic
+    private(set) var islandAppearance = IslandAppearance.dark
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var observer: NSObjectProtocol?
@@ -74,6 +88,7 @@ final class AppSettings {
         defaults.register(defaults: [
             SettingsKey.mediaKeysOnlySpotify: true,
             SettingsKey.equalizerColor: EqualizerColorChoice.automatic.rawValue,
+            SettingsKey.islandAppearance: IslandAppearance.dark.rawValue,
             SettingsKey.openAtLogin: false,
         ])
     }
@@ -95,6 +110,9 @@ final class AppSettings {
 
         let color = EqualizerColorChoice(rawValue: defaults.string(forKey: SettingsKey.equalizerColor) ?? "") ?? .automatic
         if color != equalizerColor { equalizerColor = color }
+
+        let appearance = IslandAppearance(rawValue: defaults.string(forKey: SettingsKey.islandAppearance) ?? "") ?? .dark
+        if appearance != islandAppearance { islandAppearance = appearance }
     }
 }
 

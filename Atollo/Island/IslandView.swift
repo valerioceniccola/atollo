@@ -43,14 +43,17 @@ struct IslandView: View {
         .frame(width: size.width, height: height)
         .animation(Theme.Motion.pause, value: isPlaying)
         // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.
-        .background(Theme.Island.backdrop, in: shape)
-        .glassEffect(.regular.tint(Theme.Island.glassTint), in: shape)
+        .background(model.palette.backdrop, in: shape)
+        .overlay(shape.strokeBorder(model.palette.stroke, lineWidth: 0.5))
+        .glassEffect((model.palette.clearGlass ? Glass.clear : .regular).tint(model.palette.glassTint), in: shape)
+        .animation(Theme.Motion.pause, value: model.palette)
         .clipShape(shape)
         .opacity(presentation == .hidden ? 0 : 1)
         .offset(x: model.renderedOffsetX)
         .padding(.top, model.geometry.topInset)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .environment(\.colorScheme, .dark)
+        .environment(\.islandPalette, model.palette)
+        .environment(\.colorScheme, model.palette.colorScheme)
     }
 }
 

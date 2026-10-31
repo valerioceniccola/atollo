@@ -1,8 +1,14 @@
 import SwiftUI
 
+extension EnvironmentValues {
+    /// Colori dell'isola (aspetto scuro o chiaro).
+    @Entry var islandPalette: Theme.Palette = .dark
+}
+
 // MARK: Copertina
 
 struct ArtworkView: View {
+    @Environment(\.islandPalette) private var palette
     let image: NSImage?
     let size: CGFloat
     let radius: CGFloat
@@ -18,11 +24,11 @@ struct ArtworkView: View {
                     .interpolation(.high)
                     .aspectRatio(contentMode: .fill)
             } else {
-                shape.fill(Theme.Colors.artworkPlaceholder)
+                shape.fill(palette.artworkPlaceholder)
                     .overlay {
                         Image(systemName: "music.note")
                             .font(.system(size: size * 0.45, weight: .semibold))
-                            .foregroundStyle(Theme.Colors.secondaryText)
+                            .foregroundStyle(palette.secondaryText)
                     }
             }
         }
@@ -35,19 +41,20 @@ struct ArtworkView: View {
 
 /// "Titolo · Artista": titolo semibold bianco, artista grigio secondario.
 struct TrackLineText: View {
+    @Environment(\.islandPalette) private var palette
     let title: String
     let artist: String
 
     var body: some View {
         let titleText = Text(title)
             .font(Theme.Typography.closedTitle)
-            .foregroundStyle(Theme.Colors.primaryText)
+            .foregroundStyle(palette.primaryText)
         if artist.isEmpty {
             titleText
         } else {
             let artistText = Text(Theme.Typography.separator + artist)
                 .font(Theme.Typography.closedArtist)
-                .foregroundStyle(Theme.Colors.secondaryText)
+                .foregroundStyle(palette.secondaryText)
             Text("\(titleText)\(artistText)")
         }
     }

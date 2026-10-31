@@ -1,13 +1,14 @@
 import ServiceManagement
 import SwiftUI
 
-/// Schermata di intro al primo avvio: logo, cosa fa Atollo, permessi da concedere.
+/// Schermata di intro al primo avvio: logo, cosa fa Atollo, aspetto dell'isola, permessi da concedere.
 /// Le finestre di sistema compaiono solo quando l'utente preme "Concedi".
 struct OnboardingView: View {
     let permissions: PermissionsCenter
     let onFinish: () -> Void
 
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
+    @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.dark
 
     var body: some View {
         VStack(spacing: 0) {
@@ -25,6 +26,22 @@ struct OnboardingView: View {
             .padding(.horizontal, 12)
 
             VStack(alignment: .leading, spacing: 12) {
+                Text("Aspetto")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 12) {
+                    ForEach(IslandAppearance.allCases) { option in
+                        AppearanceOption(appearance: option, isSelected: appearance == option) {
+                            withAnimation(Theme.Motion.pause) { appearance = option }
+                        }
+                    }
+                }
+            }
+            .padding(Theme.Onboarding.cardPadding)
+            .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .padding(.top, 26)
+
+            VStack(alignment: .leading, spacing: 12) {
                 Text("Permessi")
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
@@ -32,7 +49,7 @@ struct OnboardingView: View {
             }
             .padding(Theme.Onboarding.cardPadding)
             .background(.quaternary.opacity(0.5), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-            .padding(.top, 26)
+            .padding(.top, 12)
 
             HStack {
                 Toggle("Apri al login", isOn: $openAtLogin)
@@ -48,7 +65,7 @@ struct OnboardingView: View {
             }
             .padding(.top, 22)
 
-            Text("Puoi ritrovare questi permessi nelle Impostazioni, col click destro sull'isola.")
+            Text("Aspetto e permessi si cambiano anche dopo, dalle Impostazioni: click destro sull'isola.")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
                 .padding(.top, 10)
@@ -56,6 +73,53 @@ struct OnboardingView: View {
         .padding(Theme.Onboarding.padding)
         .frame(width: Theme.Onboarding.width)
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+/// Un riquadro con l'isola nell'aspetto scelto, sopra uno sfondo da scrivania.
+private struct AppearanceOption: View {
+    let appearance: IslandAppearance
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        let palette = appearance.palette
+        let capsule = Capsule(style: .continuous)
+        Button(action: action) {
+            VStack(spacing: 8) {
+                ZStack {
+                    LinearGradient(colors: [Color(red: 0.55, green: 0.78, blue: 0.86), Color(red: 0.7, green: 0.66, blue: 0.93)],
+                                   startPoint: .topLeading, endPoint: .bottomTrailing)
+                    HStack(spacing: Theme.Capsule.itemSpacing) {
+                        Circle()
+                            .fill(LinearGradient(colors: [.purple, .pink, .orange], startPoint: .topLeading, endPoint: .bottomTrailing))
+                            .frame(width: Theme.Capsule.artSize, height: Theme.Capsule.artSize)
+                        TrackLineText(title: "Gravity", artist: "Coldplay")
+                            .lineLimit(1)
+                        EqualizerView(isPlaying: true, color: appearance == .dark ? .green : Color(red: 0.1, green: 0.55, blue: 0.25),
+                                      height: Theme.Equalizer.height)
+                    }
+                    .padding(.horizontal, 4)
+                    .frame(height: 21)
+                    .background(palette.backdrop, in: capsule)
+                    .glassEffect(.regular.tint(palette.glassTint), in: capsule)
+                    .overlay(capsule.strokeBorder(palette.stroke, lineWidth: 0.5))
+                    .environment(\.islandPalette, palette)
+                    .environment(\.colorScheme, palette.colorScheme)
+                }
+                .frame(height: 64)
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(isSelected ? Color.accentColor : .primary.opacity(0.1), lineWidth: isSelected ? 2.5 : 1)
+                }
+                Text(appearance.title)
+                    .font(.callout.weight(isSelected ? .semibold : .regular))
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .frame(maxWidth: .infinity)
     }
 }
 

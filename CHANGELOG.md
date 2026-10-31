@@ -1,5 +1,10 @@
 # Novità di Atollo
 
+## 0.1.1
+
+- Nuovo aspetto chiaro: l'isola diventa vetro, con il testo scuro. Lo scegli nella schermata di benvenuto o nelle Impostazioni
+- L'equalizzatore si scurisce da solo sull'isola chiara, per restare leggibile
+
 ## 0.1.0
 
 - Prima versione: il brano di Spotify in una piccola isola nella barra dei menu, con copertina, titolo, artista ed equalizzatore

@@ -4,6 +4,7 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage(SettingsKey.mediaKeysOnlySpotify) private var mediaKeysOnlySpotify = true
     @AppStorage(SettingsKey.equalizerColor) private var equalizerColor = EqualizerColorChoice.automatic
+    @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.dark
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
 
     @State private var previewModel: IslandModel
@@ -41,9 +42,13 @@ struct SettingsView: View {
 
             Section {
                 islandPreview
+                Picker("Isola", selection: $appearance) {
+                    ForEach(IslandAppearance.allCases) { Text($0.title).tag($0) }
+                }
+                .pickerStyle(.segmented)
                 colorPicker
             } header: {
-                Text("Equalizzatore")
+                Text("Aspetto")
             }
 
             Section {
