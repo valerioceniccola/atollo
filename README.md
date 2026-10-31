@@ -6,7 +6,7 @@
 
 <p align="center">Il brano di Spotify in una piccola isola nella barra dei menu del Mac.</p>
 
-<p align="center"><a href="https://github.com/valerioceniccola/atollo/releases/latest"><b>Scarica Atollo per Mac</b></a></p>
+<p align="center"><a href="https://github.com/valerioceniccola/atollo/releases/latest"><b>Scarica Atollo per Mac</b></a> · <a href="https://atollo.hortelab.com">atollo.hortelab.com</a></p>
 
 ---
 
@@ -58,4 +58,4 @@ I comandi delle AirPods e delle cuffie Bluetooth vanno già all'app che sta suon
 
 ---
 
-Per chi sviluppa: [rilasciare una nuova versione](docs/RELEASING.md).
+Per chi sviluppa: [rilasciare una nuova versione](docs/RELEASING.md). La landing è in `site/` e si pubblica da sola su GitHub Pages a ogni modifica.
