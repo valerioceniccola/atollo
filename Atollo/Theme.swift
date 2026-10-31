@@ -7,9 +7,10 @@ nonisolated enum Theme {
     // MARK: Animazioni
 
     enum Motion {
-        /// Molla principale stile Apple per apertura, chiusura e comparsa dell'isola.
-        static let springResponse: Double = 0.45
-        static let springDamping: Double = 0.85
+        /// Molla dei cambi di larghezza dell'isola: un rimbalzo appena accennato
+        /// sul bordo che si muove, come le animazioni di sistema di Apple.
+        static let springResponse: Double = 0.3
+        static let springDamping: Double = 0.72
         static var island: Animation { .spring(response: springResponse, dampingFraction: springDamping) }
 
 

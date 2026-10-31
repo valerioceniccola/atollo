@@ -30,7 +30,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 - Visibile anche a schermo intero e durante la condivisione dello schermo.
 - Contenuto: copertina circolare (14 pt, concentrica con l'estremità della capsula), "Titolo · Artista" (titolo semibold, artista grigio), equalizzatore.
 - **Larghezza decisa da noi**, non dall'utente: segue il testo tra 200 e 300 pt; oltre, marquee avanti e indietro (pausa di circa 1,5 s ai capi) con dissolvenza ai bordi.
-- Animazioni a molla in stile Apple (response circa 0,45, damping circa 0,85). La finestra si allarga prima dell'animazione e si restringe solo a molla finita, così l'isola non scatta mai.
+- Animazioni a molla in stile Apple; i cambi di larghezza con un rimbalzo appena accennato (response 0,3, damping 0,72). La finestra si allarga prima dell'animazione e si restringe solo a molla finita, così l'isola non scatta mai.
 - **Cambio brano**: la copertina fa una dissolvenza incrociata; il titolo vecchio svanisce sul posto e il nuovo compare con una leggera sfocatura e pochi punti di spostamento. Discreto.
 - **Pausa**: l'isola si fa compatta (solo copertina ed equalizzatore spento, barre basse e sbiadite, niente icona di pausa); il vetro resta lo stesso.
 - **Spotify aperto o chiuso**: comparsa e scomparsa in dissolvenza rapida, sul posto.
