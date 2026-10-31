@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Atollo legge da Spotify il brano in riproduzione (titolo, artista, copertina, stato) e gli manda i comandi play/pausa, avanti e indietro dei tasti multimediali.</string>
+</dict>
+</plist>
