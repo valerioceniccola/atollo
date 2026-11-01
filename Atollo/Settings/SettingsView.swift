@@ -42,7 +42,7 @@ struct SettingsView: View {
 
             Section {
                 islandPreview
-                Picker("Isola", selection: $appearance) {
+                Picker("Tema", selection: $appearance) {
                     ForEach(IslandAppearance.allCases) { Text($0.title).tag($0) }
                 }
                 .pickerStyle(.segmented)

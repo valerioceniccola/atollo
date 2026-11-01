@@ -23,22 +23,22 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 - `#Preview` per gli stati: nascosta, visibile, testo lungo, in pausa, MacBook.
 
 ## UI — l'isola
-- **Sempre nella barra dei menu, a sinistra delle altre icone.** Non imita il notch. Un `NSStatusItem` vuoto riserva lo spazio; l'isola è un pannello overlay (NSPanel non attivante, sopra la barra dei menu) agganciato al **bordo destro** di quell'elemento, così cambiando larghezza cresce solo verso sinistra con una sola animazione.
-- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo. In Impostazioni › Aspetto › Isola c'è anche un aspetto **chiaro**: solo vetro normale di macOS, senza velo né tinta, con un filo scuro all'8% sul bordo, testo scuro ed equalizzatore scurito (stessa tinta). Default: scuro.
-- Lo spazio nella barra lo riserva un `NSStatusItem` largo esattamente quanto l'isola (attorno solo la spaziatura di sistema); la posizione si legge dal pulsante dell'elemento, non dalla sua finestra, e solo a barra ferma.
+- **Sempre nella barra dei menu, a sinistra delle altre icone.** Non imita il notch. Un `NSStatusItem` vuoto riserva lo spazio; la capsula è un pannello overlay (NSPanel non attivante, sopra la barra dei menu) agganciato al **bordo destro** di quell'elemento, così cambiando larghezza cresce solo verso sinistra con una sola animazione. Disegnarla dentro l'elemento non va: macOS non sa animare la larghezza di un elemento della barra (lo ridimensiona dal lato sinistro e poi lo riallinea), e la molla diventa uno scivolamento storto.
+- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo. In Impostazioni › Aspetto › Tema c'è anche un aspetto **chiaro**: solo vetro normale di macOS, senza velo né tinta, con un filo scuro all'8% sul bordo, testo scuro ed equalizzatore scurito (stessa tinta). Default: scuro.
+- Lo spazio nella barra lo riserva un `NSStatusItem` largo esattamente quanto la capsula (attorno solo la spaziatura di sistema); la posizione si legge dal pulsante dell'elemento, non dalla sua finestra, e solo a barra ferma.
 - **Visibile finché Spotify è aperto**, anche in pausa; sparisce quando Spotify si chiude. Compare e sparisce con un'animazione.
-- Visibile anche a schermo intero e durante la condivisione dello schermo.
+- **Nascosta a schermo intero** (video, giochi, Spazi a schermo intero), come la barra dei menu: il pannello non va sugli Spazi a schermo intero e si nasconde quando una finestra copre tutto lo schermo. Visibile durante la condivisione dello schermo.
 - Contenuto: copertina circolare (14 pt, concentrica con l'estremità della capsula), "Titolo · Artista" (titolo semibold, artista grigio), equalizzatore.
-- **Larghezza decisa da noi**, non dall'utente: segue il testo tra 200 e 300 pt; oltre, marquee avanti e indietro (pausa di circa 1,5 s ai capi) con dissolvenza ai bordi.
-- Animazioni a molla in stile Apple; i cambi di larghezza con un rimbalzo appena accennato (response 0,3, damping 0,72). La finestra si allarga prima dell'animazione e si restringe solo a molla finita, così l'isola non scatta mai.
+- **Larghezza decisa da noi**, non dall'utente: segue il testo tra 200 e 300 pt; oltre, marquee avanti e indietro (lento, pausa di 3 s ai capi) con dissolvenza ai bordi.
+- Animazioni a molla in stile Apple; i cambi di larghezza con un rimbalzo appena accennato (response 0,3, damping 0,72). La finestra si allarga prima dell'animazione e si restringe solo a molla finita, così la capsula non scatta mai.
 - **Cambio brano**: la copertina fa una dissolvenza incrociata; il titolo vecchio svanisce sul posto e il nuovo compare con una leggera sfocatura e pochi punti di spostamento. Discreto.
 - **Pausa**: l'isola si fa compatta (solo copertina ed equalizzatore spento, barre basse e sbiadite, niente icona di pausa); il vetro resta lo stesso.
 - **Spotify aperto o chiuso**: comparsa e scomparsa in dissolvenza rapida, sul posto.
 
 ### Interazione
 - **Click sinistro**: porta Spotify in primo piano. Nessun effetto al passaggio del mouse.
-- **Click destro**: menu con "Copia link del brano" (da `spotify url`, convertito in link `open.spotify.com`), separatore, "Impostazioni…".
-- I click li riceve l'elemento nella barra dei menu sotto l'isola: la finestra dell'isola lascia passare il mouse.
+- **Click destro**: menu con "Copia link del brano" (da `spotify url`, convertito in link `open.spotify.com`), separatore, "Impostazioni…", "Esci da Atollo".
+- I click li riceve l'elemento nella barra dei menu sotto la capsula: la sua finestra lascia passare il mouse.
 - Riaprire l'app dal Finder mostra le impostazioni.
 
 ## Equalizzatore

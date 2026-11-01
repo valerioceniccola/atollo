@@ -10,6 +10,7 @@ final class IslandManager {
 
     private var islands: [CGDirectDisplayID: IslandWindowController] = [:]
     private let anchor = MenuBarAnchor()
+    private let fullScreen = FullScreenDetector()
     private var isStarted = false
     private var screenObserver: NSObjectProtocol?
 
@@ -22,6 +23,7 @@ final class IslandManager {
     }
 
     func start() {
+        fullScreen.start()
         rebuildIslands()
         screenObserver = NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
@@ -56,6 +58,8 @@ final class IslandManager {
         for island in islands.values {
             let maxX = island === host ? anchor.frame?.maxX : nil
             if island.model.anchorMaxX != maxX { island.model.anchorMaxX = maxX }
+            let covered = fullScreen.isFullScreen(island.screen)
+            if island.model.isCoveredByFullScreen != covered { island.model.isCoveredByFullScreen = covered }
         }
     }
 
@@ -89,6 +93,8 @@ final class IslandManager {
         let copy = NSMenuItem(title: "Copia link del brano", action: #selector(MenuTarget.copyLink), keyEquivalent: "")
         copy.isEnabled = controller.shareURL != nil
         let settingsItem = NSMenuItem(title: "Impostazioni…", action: #selector(MenuTarget.openSettings), keyEquivalent: ",")
+        let quit = NSMenuItem(title: "Esci da Atollo", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        quit.target = NSApp
 
         let target = MenuTarget(
             copyLink: { [weak self] in
@@ -100,7 +106,7 @@ final class IslandManager {
         )
         for item in [copy, settingsItem] { item.target = target }
         menu.autoenablesItems = false
-        menu.items = [copy, .separator(), settingsItem]
+        menu.items = [copy, .separator(), settingsItem, quit]
         // Il target va tenuto vivo finché il menu è aperto.
         objc_setAssociatedObject(menu, &MenuTarget.key, target, .OBJC_ASSOCIATION_RETAIN)
 

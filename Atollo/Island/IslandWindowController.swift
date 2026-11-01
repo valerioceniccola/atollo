@@ -1,14 +1,15 @@
 import AppKit
 import SwiftUI
 
-/// Pannello senza bordi, non attivante, sopra la barra dei menu e su tutti gli Spazi.
+/// Pannello senza bordi, non attivante, sopra la barra dei menu e su tutti gli Spazi
+/// tranne quelli a schermo intero, dove la barra dei menu è nascosta.
 final class IslandPanel: NSPanel {
     init() {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         isOpaque = false
         backgroundColor = .clear
         hasShadow = false
-        collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
+        collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
         isMovable = false
         hidesOnDeactivate = false
         // Va impostato dopo `isFloatingPanel` (che lo riporterebbe a `.floating`): sopra la barra dei menu.

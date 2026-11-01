@@ -17,7 +17,7 @@ struct OnboardingView: View {
                     .frame(width: Theme.Onboarding.logoSize, height: Theme.Onboarding.logoSize)
                 Text("Benvenuto in Atollo")
                     .font(.system(size: 26, weight: .bold))
-                Text("Il brano di Spotify in una piccola isola nella barra dei menu: copertina, titolo e artista sempre a colpo d'occhio, e i tasti multimediali che vanno solo a Spotify.")
+                Text("Il brano di Spotify nella barra dei menu: copertina, titolo e artista sempre a colpo d'occhio, e i tasti multimediali che vanno solo a Spotify.")
                     .font(.body)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -65,7 +65,7 @@ struct OnboardingView: View {
             }
             .padding(.top, 22)
 
-            Text("Aspetto e permessi si cambiano anche dopo, dalle Impostazioni: click destro sull'isola.")
+            Text("Aspetto e permessi si cambiano anche dopo, dalle Impostazioni: click destro su Atollo nella barra dei menu.")
                 .font(.footnote)
                 .foregroundStyle(.tertiary)
                 .padding(.top, 10)

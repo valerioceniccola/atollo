@@ -67,6 +67,8 @@ nonisolated enum Theme {
         static let menuBarItemPadding: CGFloat = 0
         /// Attesa, dopo l'ultimo movimento, prima di leggere la posizione dell'elemento nella barra dei menu.
         static let menuBarSettleDelay: TimeInterval = 0.3
+        /// Dopo un cambio di Spazio, quando ricontrollare se c'è un'app a schermo intero.
+        static let fullScreenSettleDelay: TimeInterval = 0.6
         /// Distanza minima dai bordi dello schermo.
         static let screenEdgeInset: CGFloat = 8
 
@@ -99,8 +101,8 @@ nonisolated enum Theme {
 
     enum Marquee {
         /// Punti al secondo.
-        static let speed: CGFloat = 28
-        static let pause: TimeInterval = 1.5
+        static let speed: CGFloat = 18
+        static let pause: TimeInterval = 3
         static let fadeWidth: CGFloat = 10
     }
 
@@ -145,7 +147,8 @@ nonisolated enum Theme {
             backdrop: Island.backdrop,
             glassTint: Island.glassTint,
             clearGlass: false,
-            stroke: .clear,
+            // Un filo di luce sul bordo, come il vetro di sistema.
+            stroke: .white.opacity(0.14),
             colorScheme: .dark
         )
 
@@ -153,11 +156,11 @@ nonisolated enum Theme {
             primaryText: Color(red: 0.11, green: 0.11, blue: 0.12),
             secondaryText: Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.6),
             artworkPlaceholder: .black.opacity(0.1),
-            // Solo vetro smerigliato, senza velo né tinta, con un filo sul bordo.
-            backdrop: .clear,
-            glassTint: .clear,
+            // Vetro smerigliato rinforzato da un velo chiaro appena accennato, con un filo sul bordo.
+            backdrop: .white.opacity(0.3),
+            glassTint: .white.opacity(0.2),
             clearGlass: false,
-            stroke: .black.opacity(0.08),
+            stroke: .black.opacity(0.12),
             colorScheme: .light
         )
     }

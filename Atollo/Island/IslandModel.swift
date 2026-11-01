@@ -26,6 +26,9 @@ final class IslandModel {
     /// `nil` se l'elemento non è su questo schermo: allora l'isola qui non si mostra.
     var anchorMaxX: CGFloat?
 
+    /// C'è un'app a schermo intero su questo schermo: la barra dei menu è nascosta e Atollo con lei.
+    var isCoveredByFullScreen = false
+
     // MARK: Stato disegnato (lo aggiorna il window controller)
 
     var displayedPresentation: Presentation = .hidden
@@ -47,10 +50,11 @@ final class IslandModel {
         self.controller = controller
     }
 
-    /// Visibile finché Spotify è aperto, sullo schermo che ha l'elemento nella barra dei menu.
+    /// Visibile finché Spotify è aperto, sullo schermo che ha l'elemento nella barra dei menu,
+    /// tranne quando lì c'è un'app a schermo intero.
     var presentation: Presentation {
         if let forcedPresentation { return forcedPresentation }
-        guard nowPlaying.isPresentable, anchorMaxX != nil else { return .hidden }
+        guard nowPlaying.isPresentable, anchorMaxX != nil, !isCoveredByFullScreen else { return .hidden }
         return .visible
     }
 

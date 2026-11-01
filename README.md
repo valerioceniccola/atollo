@@ -4,7 +4,7 @@
 
 <h1 align="center">Atollo</h1>
 
-<p align="center">Il brano di Spotify in una piccola isola nella barra dei menu del Mac.</p>
+<p align="center">Il brano di Spotify nella barra dei menu del Mac.</p>
 
 <p align="center"><a href="https://github.com/valerioceniccola/atollo/releases/latest"><b>Scarica Atollo per Mac</b></a> · <a href="https://atollo.hortelab.com">atollo.hortelab.com</a></p>
 
@@ -15,7 +15,7 @@ Atollo mette nella barra dei menu una capsula di vetro scuro con la copertina, i
 ## Cosa fa
 
 - **Il brano sempre a colpo d'occhio.** Copertina, titolo e artista; se il titolo è lungo scorre avanti e indietro.
-- **Discreta in pausa.** Quando metti in pausa l'isola si stringe a copertina ed equalizzatore spento.
+- **Discreta in pausa.** Quando metti in pausa Atollo si stringe a copertina ed equalizzatore spento.
 - **Al suo posto tra le icone.** Sta a sinistra delle altre icone della barra dei menu, con la loro stessa spaziatura, anche a schermo intero.
 - **Tasti multimediali solo per Spotify.** Play/pausa, avanti e indietro della tastiera vanno a Spotify, non al primo video aperto nel browser.
 - **Equalizzatore del colore giusto.** In automatico prende il colore dello sfondo della scrivania; oppure l'accento di sistema o un colore a scelta.
@@ -33,9 +33,9 @@ Servono macOS 27 e l'app Spotify per Mac.
 
 | Per… | Fai così |
 |---|---|
-| aprire Spotify | clic sull'isola |
-| copiare il link del brano | tasto destro sull'isola › *Copia link del brano* |
-| impostazioni | tasto destro sull'isola › *Impostazioni…*, oppure riapri Atollo dal Finder |
+| aprire Spotify | clic su Atollo |
+| copiare il link del brano | tasto destro su Atollo › *Copia link del brano* |
+| impostazioni | tasto destro su Atollo › *Impostazioni…*, oppure riapri Atollo dal Finder |
 | controllare gli aggiornamenti | Impostazioni › *Controlla ora…* |
 
 ## Permessi
@@ -47,7 +47,7 @@ Atollo non ascolta e non registra l'audio, e non ha server: parla solo con Spoti
 
 ## Domande frequenti
 
-**Non vedo l'isola.**
+**Non vedo Atollo nella barra dei menu.**
 Compare solo con Spotify aperto. Se Spotify è aperto, controlla in Impostazioni › Permessi che *Controllo di Spotify* sia concesso.
 
 **I tasti multimediali aprono ancora Apple Music.**
