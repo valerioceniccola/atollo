@@ -5,7 +5,7 @@
 - A schermo intero (video, giochi, app a schermo intero) Atollo si nasconde, come la barra dei menu
 - Nel menu del clic destro c'è "Esci da Atollo"
 - I titoli lunghi scorrono più lentamente e si fermano 3 secondi a ogni lato
-- Il tema scuro ha un filo di luce sul bordo; quello chiaro è più bianco e più marcato
+- Il tema chiaro è più bianco e più marcato, e come quello scuro non ha più il bordo
 - Nelle Impostazioni la scelta fra chiaro e scuro si chiama "Tema"
 
 ## 0.1.1

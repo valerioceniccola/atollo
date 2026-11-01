@@ -147,8 +147,7 @@ nonisolated enum Theme {
             backdrop: Island.backdrop,
             glassTint: Island.glassTint,
             clearGlass: false,
-            // Un filo di luce sul bordo, come il vetro di sistema.
-            stroke: .white.opacity(0.14),
+            stroke: .clear,
             colorScheme: .dark
         )
 
@@ -156,11 +155,11 @@ nonisolated enum Theme {
             primaryText: Color(red: 0.11, green: 0.11, blue: 0.12),
             secondaryText: Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.6),
             artworkPlaceholder: .black.opacity(0.1),
-            // Vetro smerigliato rinforzato da un velo chiaro appena accennato, con un filo sul bordo.
+            // Vetro smerigliato rinforzato da un velo chiaro, senza bordo come quello scuro.
             backdrop: .white.opacity(0.3),
             glassTint: .white.opacity(0.2),
             clearGlass: false,
-            stroke: .black.opacity(0.12),
+            stroke: .clear,
             colorScheme: .light
         )
     }
