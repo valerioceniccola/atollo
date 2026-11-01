@@ -107,11 +107,21 @@ struct SettingsView: View {
         .padding(.vertical, 2)
     }
 
+    private var artworkSwatchImage: NSImage { previewModel.nowPlaying.artwork ?? .sampleArtwork }
+
+    private var artworkSwatchScale: CGFloat {
+        let side = min(artworkSwatchImage.size.width, artworkSwatchImage.size.height)
+        return side > 0 ? Theme.EqualizerColor.swatchSize / side : 1
+    }
+
     private func swatchFill(for choice: EqualizerColorChoice) -> AnyShapeStyle {
         switch choice {
         case .automatic:
             AnyShapeStyle(AngularGradient(colors: [.red, .orange, .yellow, .green, .teal, .blue, .purple, .pink, .red],
                                           center: .center))
+        case .artwork:
+            // La copertina in riproduzione, ritagliata nel cerchietto.
+            AnyShapeStyle(ImagePaint(image: Image(nsImage: artworkSwatchImage), scale: artworkSwatchScale))
         case .accent:
             AnyShapeStyle(Color(nsColor: NSColor.controlAccentColor.resolved(for: .darkAqua)))
         default:

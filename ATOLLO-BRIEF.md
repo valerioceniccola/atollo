@@ -48,8 +48,9 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 ### Colore dell'equalizzatore (Impostazioni)
 Una riga di cerchietti come quella del colore di accento in Impostazioni di Sistema → Aspetto:
 1. **Automatico (default)**: colore ricavato dallo sfondo della scrivania di quello schermo (`NSWorkspace.shared.desktopImageURL(for:)`), colore dominante ignorando i pixel quasi grigi o quasi neri, poi reso leggibile sul nero in OKLCH (luminosità minima circa 0,75, croma circa 0,08–0,16). Ricalcolato quando cambiano Spazio, schermo o sfondo. Ripiego: `controlAccentColor` schiarito con la stessa regola.
-2. **Accento di sistema**: `NSColor.controlAccentColor`.
-3. **Preimpostati**: systemBlue, systemPurple, systemPink, systemRed, systemOrange, systemYellow, systemGreen, systemGray (Grafite) e bianco, nelle varianti per l'aspetto scuro.
+2. **Dalla copertina**: colore dominante della copertina in riproduzione, con la stessa regola di leggibilità; cambia a ogni brano. Se la copertina è quasi grigia si usa lo sfondo, come in Automatico.
+3. **Accento di sistema**: `NSColor.controlAccentColor`.
+4. **Preimpostati**: systemBlue, systemPurple, systemPink, systemRed, systemOrange, systemYellow, systemGreen, systemGray (Grafite) e bianco, nelle varianti per l'aspetto scuro.
 
 ## Tasti multimediali solo per Spotify
 - Intercetta play/pausa, avanti e indietro (CGEventTap sugli eventi `NSSystemDefined`, subtype 8) e inoltrali **solo** a Spotify, bloccando l'evento originale.

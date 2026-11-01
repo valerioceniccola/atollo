@@ -69,6 +69,8 @@ nonisolated enum Theme {
         static let menuBarSettleDelay: TimeInterval = 0.3
         /// Dopo un cambio di Spazio, quando ricontrollare se c'è un'app a schermo intero.
         static let fullScreenSettleDelay: TimeInterval = 0.6
+        /// Controllo periodico dello schermo intero (una lettura dell'elenco finestre, leggera).
+        static let fullScreenPollInterval: TimeInterval = 2
         /// Distanza minima dai bordi dello schermo.
         static let screenEdgeInset: CGFloat = 8
 
@@ -77,10 +79,8 @@ nonisolated enum Theme {
         /// con l'estremità della capsula.
         static let artRadius: CGFloat = artSize / 2
         static let itemSpacing: CGFloat = 7
-        /// Margine aggiuntivo ai lati del contenuto, oltre a quello della copertina:
-        /// appena un filo a sinistra, un po' di più a destra dopo l'equalizzatore.
-        static let extraLeadingInset: CGFloat = 0.5
-        static let extraTrailingInset: CGFloat = 3
+        /// Margine ai lati del contenuto, uguale a sinistra (copertina) e a destra (equalizzatore).
+        static let horizontalInset: CGFloat = 1
 
     }
 

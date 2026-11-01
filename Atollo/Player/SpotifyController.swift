@@ -8,6 +8,8 @@ final class NowPlayingState {
     var status: PlaybackStatus = .stopped
     var track: TrackInfo?
     var artwork: NSImage?
+    /// Colore dominante della copertina, già leggibile sul nero; `nil` se è quasi grigia o manca.
+    var artworkColor: NSColor?
     /// Vero mentre l'isola va mostrata: cioè finché Spotify è aperto.
     var isPresentable = false
 
@@ -27,6 +29,7 @@ final class NowPlayingState {
         state.track = TrackInfo(title: title, artist: artist, album: "", artworkURL: nil,
                                 uri: "spotify:track:0VjIjW4GlUZAMYd2vXMi3b")
         state.artwork = .sampleArtwork
+        state.artworkColor = DominantColorExtractor.dominantColor(of: NSImage.sampleArtwork)
         state.isPresentable = true
         return state
     }
@@ -121,11 +124,19 @@ final class SpotifyController {
     private func loadArtwork(for track: TrackInfo?) {
         guard let url = track?.artworkURL else {
             state.artwork = nil
+            state.artworkColor = nil
             return
         }
         Task {
             let image = await artworkLoader.image(for: url)
-            if state.track?.artworkURL == url { state.artwork = image }
+            guard state.track?.artworkURL == url else { return }
+            state.artwork = image
+            // Il colore per l'equalizzatore si calcola fuori dal thread principale, su una miniatura.
+            let cgImage = image?.cgImage(forProposedRect: nil, context: nil, hints: nil)
+            let color = await Task.detached(priority: .utility) {
+                cgImage.flatMap(DominantColorExtractor.dominantColor(in:))
+            }.value
+            if state.track?.artworkURL == url { state.artworkColor = color }
         }
     }
 }

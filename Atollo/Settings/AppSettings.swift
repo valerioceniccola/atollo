@@ -23,13 +23,14 @@ enum IslandAppearance: String, CaseIterable, Identifiable {
 }
 
 enum EqualizerColorChoice: String, CaseIterable, Identifiable {
-    case automatic, accent, blue, purple, pink, red, orange, yellow, green, graphite, white
+    case automatic, artwork, accent, blue, purple, pink, red, orange, yellow, green, graphite, white
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .automatic: "Automatico (dallo sfondo)"
+        case .artwork: "Dalla copertina"
         case .accent: "Accento di sistema"
         case .blue: "Blu"
         case .purple: "Viola"
@@ -43,11 +44,11 @@ enum EqualizerColorChoice: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Colore fisso (variante per l'aspetto scuro); `nil` per automatico e accento.
+    /// Colore fisso (variante per l'aspetto scuro); `nil` per automatico, copertina e accento.
     var presetColor: NSColor? {
         let base: NSColor
         switch self {
-        case .automatic, .accent: return nil
+        case .automatic, .artwork, .accent: return nil
         case .blue: base = .systemBlue
         case .purple: base = .systemPurple
         case .pink: base = .systemPink

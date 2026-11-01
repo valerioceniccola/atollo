@@ -89,7 +89,7 @@ final class IslandModel {
     var palette: Theme.Palette { settings.islandAppearance.palette }
 
     var equalizerColor: Color {
-        let color = colors?.nsColor(for: geometry.displayID) ?? EqualizerColorChoice.blue.presetColor ?? .systemBlue
+        let color = colors?.nsColor(for: geometry.displayID, artworkColor: nowPlaying.artworkColor) ?? EqualizerColorChoice.blue.presetColor ?? .systemBlue
         guard settings.islandAppearance == .light, var oklch = OKLCH(color) else { return Color(nsColor: color) }
         // I colori pensati per il nero sono chiari: sull'isola chiara si scuriscono, stessa tinta.
         oklch.l = min(oklch.l, Theme.EqualizerColor.lightMaxLightness)
@@ -122,7 +122,7 @@ final class IslandModel {
 
     /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo tra la minima e la massima.
     var closedWidth: CGFloat {
-        let padding = 2 * geometry.contentInset + Theme.Capsule.extraLeadingInset + Theme.Capsule.extraTrailingInset
+        let padding = 2 * Theme.Capsule.horizontalInset
         if isCompact {
             return (padding + Theme.Capsule.artSize + Theme.Capsule.itemSpacing + EqualizerView.width).rounded(.up)
         }

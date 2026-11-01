@@ -38,8 +38,7 @@ struct IslandView: View {
 
             EqualizerView(isPlaying: isPlaying, color: model.equalizerColor, height: Theme.Equalizer.height)
         }
-        .padding(.leading, model.geometry.contentInset + Theme.Capsule.extraLeadingInset)
-        .padding(.trailing, model.geometry.contentInset + Theme.Capsule.extraTrailingInset)
+        .padding(.horizontal, Theme.Capsule.horizontalInset)
         .frame(width: size.width, height: height)
         .animation(Theme.Motion.pause, value: isPlaying)
         // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.

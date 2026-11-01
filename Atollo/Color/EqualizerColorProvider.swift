@@ -36,12 +36,17 @@ final class EqualizerColorProvider {
         refreshWallpapers(force: true)
     }
 
-    func color(for displayID: CGDirectDisplayID?) -> Color {
-        Color(nsColor: nsColor(for: displayID))
+    func color(for displayID: CGDirectDisplayID?, artworkColor: NSColor? = nil) -> Color {
+        Color(nsColor: nsColor(for: displayID, artworkColor: artworkColor))
     }
 
-    func nsColor(for displayID: CGDirectDisplayID?) -> NSColor {
+    /// `artworkColor` è il colore della copertina in riproduzione: se manca (copertina quasi grigia)
+    /// si ripiega sullo sfondo della scrivania.
+    func nsColor(for displayID: CGDirectDisplayID?, artworkColor: NSColor? = nil) -> NSColor {
         switch settings.equalizerColor {
+        case .artwork:
+            if let artworkColor { return artworkColor }
+            fallthrough
         case .automatic:
             if let displayID, let color = wallpaperColors[displayID] { return color }
             return Self.readable(accent)
@@ -80,7 +85,7 @@ final class EqualizerColorProvider {
 
         for (id, url) in current {
             Task.detached(priority: .utility) {
-                let color = WallpaperColorExtractor.dominantColor(of: url)
+                let color = DominantColorExtractor.dominantColor(of: url)
                 await MainActor.run { [weak self] in
                     guard let self, self.wallpaperURLs[id] == url else { return }
                     if let color { self.wallpaperColors[id] = color } else { self.wallpaperColors[id] = nil }
@@ -94,10 +99,17 @@ final class EqualizerColorProvider {
     }
 }
 
-/// Colore dominante di un'immagine, reso leggibile sul nero.
-nonisolated enum WallpaperColorExtractor {
+/// Colore dominante di un'immagine (sfondo della scrivania o copertina), reso leggibile sul nero.
+nonisolated enum DominantColorExtractor {
     static func dominantColor(of url: URL) -> NSColor? {
-        guard let image = thumbnail(of: url) else { return nil }
+        thumbnail(of: url).flatMap(dominantColor(in:))
+    }
+
+    static func dominantColor(of image: NSImage) -> NSColor? {
+        image.cgImage(forProposedRect: nil, context: nil, hints: nil).flatMap(dominantColor(in:))
+    }
+
+    static func dominantColor(in image: CGImage) -> NSColor? {
         let side = Theme.EqualizerColor.thumbnailSize
         let width = min(image.width, side), height = min(image.height, side)
         var pixels = [UInt8](repeating: 0, count: width * height * 4)
