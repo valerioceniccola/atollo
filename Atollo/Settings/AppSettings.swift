@@ -5,21 +5,44 @@ enum SettingsKey {
     static let mediaKeysOnlySpotify = "mediaKeysOnlySpotify"
     static let equalizerColor = "equalizerColor"
     static let islandAppearance = "islandAppearance"
+    /// L'ultima capsula scelta (scura o chiara), per riattivarla uguale.
+    static let capsuleAppearance = "capsuleAppearance"
     static let openAtLogin = "openAtLogin"
     static let didPromptAccessibility = "didPromptAccessibility"
     static let didCompleteOnboarding = "didCompleteOnboarding"
 }
 
 enum IslandAppearance: String, CaseIterable, Identifiable {
-    case dark, light
+    /// Trasparente è il default; scuro e chiaro sono la capsula di vetro.
+    case transparent, dark, light
     var id: String { rawValue }
     var title: String {
         switch self {
         case .dark: "Scuro"
         case .light: "Chiaro"
+        case .transparent: "Trasparente"
         }
     }
-    var palette: Theme.Palette { self == .dark ? .dark : .light }
+
+    /// Trasparente segue la barra dei menu: testo bianco se la barra ce l'ha bianco, scuro altrimenti.
+    static let capsuleStyles: [IslandAppearance] = [.dark, .light]
+
+    /// Nell'intro le tre scelte stanno insieme: si dice anche che scuro e chiaro sono una capsula.
+    var choiceTitle: String {
+        switch self {
+        case .transparent: "Trasparente"
+        case .dark: "Capsula scura"
+        case .light: "Capsula chiara"
+        }
+    }
+
+    func palette(darkMenuBar: Bool = true) -> Theme.Palette {
+        switch self {
+        case .dark: .dark
+        case .light: .light
+        case .transparent: darkMenuBar ? .transparentOnDark : .transparentOnLight
+        }
+    }
 }
 
 enum EqualizerColorChoice: String, CaseIterable, Identifiable {
@@ -80,7 +103,7 @@ extension NSColor {
 final class AppSettings {
     private(set) var mediaKeysOnlySpotify = true
     private(set) var equalizerColor = EqualizerColorChoice.automatic
-    private(set) var islandAppearance = IslandAppearance.dark
+    private(set) var islandAppearance = IslandAppearance.transparent
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var observer: NSObjectProtocol?
@@ -89,7 +112,8 @@ final class AppSettings {
         defaults.register(defaults: [
             SettingsKey.mediaKeysOnlySpotify: true,
             SettingsKey.equalizerColor: EqualizerColorChoice.automatic.rawValue,
-            SettingsKey.islandAppearance: IslandAppearance.dark.rawValue,
+            SettingsKey.islandAppearance: IslandAppearance.transparent.rawValue,
+            SettingsKey.capsuleAppearance: IslandAppearance.dark.rawValue,
             SettingsKey.openAtLogin: false,
         ])
     }
@@ -112,7 +136,7 @@ final class AppSettings {
         let color = EqualizerColorChoice(rawValue: defaults.string(forKey: SettingsKey.equalizerColor) ?? "") ?? .automatic
         if color != equalizerColor { equalizerColor = color }
 
-        let appearance = IslandAppearance(rawValue: defaults.string(forKey: SettingsKey.islandAppearance) ?? "") ?? .dark
+        let appearance = IslandAppearance(rawValue: defaults.string(forKey: SettingsKey.islandAppearance) ?? "") ?? .transparent
         if appearance != islandAppearance { islandAppearance = appearance }
     }
 }

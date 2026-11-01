@@ -1,5 +1,13 @@
 # Novità di Atollo
 
+## 0.2.0
+
+- Atollo ora è un vero elemento della barra dei menu: a schermo intero, con il notch e con le app che riordinano le icone si comporta come le altre
+- Nuovo aspetto Trasparente, il nuovo predefinito: niente sfondo, testo bianco o scuro come la barra. La capsula scura o chiara si accende dalle Impostazioni
+- La larghezza segue il titolo, fino a 270 punti; quando si allarga non copre le icone accanto
+- Un clic su Atollo riapre Spotify anche se è ridotto nel Dock
+- Nuova opzione "Aggiorna automaticamente", anche nella schermata di benvenuto
+
 ## 0.1.2
 
 - A schermo intero (video, giochi, app a schermo intero) Atollo si nasconde, come la barra dei menu; anche con i giochi che coprono la barra, come quelli avviati con CrossOver

@@ -1,18 +1,23 @@
 import AppKit
+import SwiftUI
 
-/// Un'isola per ogni schermo, ricreate quando cambiano gli schermi.
-/// Gestisce anche il menu del click destro.
+/// Atollo nella barra dei menu: un `NSStatusItem` che disegna il contenuto dentro di sé,
+/// come le altre icone. Segue la barra in tutto (schermo intero, notch, barra nascosta, più schermi,
+/// app che riordinano le icone) senza finestre proprie. Gestisce anche i click e il menu del click destro.
 final class IslandManager {
     private let controller: SpotifyController
     private let settings: AppSettings
     private let colors: EqualizerColorProvider
     private let openSettings: () -> Void
 
-    private var islands: [CGDirectDisplayID: IslandWindowController] = [:]
-    private let anchor = MenuBarAnchor()
-    private let fullScreen = FullScreenDetector()
-    private var isStarted = false
-    private var screenObserver: NSObjectProtocol?
+    private let model: IslandModel
+    private var item: NSStatusItem?
+    private var hostingView: IslandHostingView?
+    private let clickTarget = ClickTarget()
+    private var removeTask: Task<Void, Never>?
+    private var observers: [NSObjectProtocol] = []
+    private var appearanceObservation: NSKeyValueObservation?
+    private var growWork: DispatchWorkItem?
 
     init(controller: SpotifyController, settings: AppSettings, colors: EqualizerColorProvider,
          openSettings: @escaping () -> Void) {
@@ -20,70 +25,164 @@ final class IslandManager {
         self.settings = settings
         self.colors = colors
         self.openSettings = openSettings
+        model = IslandModel(geometry: IslandGeometry(screen: NSScreen.main ?? NSScreen.screens[0]),
+                            nowPlaying: controller.state, settings: settings, colors: colors,
+                            controller: controller)
     }
 
     func start() {
-        fullScreen.start()
-        rebuildIslands()
-        screenObserver = NotificationCenter.default.addObserver(
+        clickTarget.onLeftClick = { [weak self] in self?.controller.activateSpotify() }
+        clickTarget.onRightClick = { [weak self] button in self?.showMenu(at: button) }
+        observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
         ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.rebuildIslands() }
-        }
-        anchor.onRightClick = { [weak self] button in self?.showMenu(at: button) }
-        anchor.onLeftClick = { [weak self] in self?.controller.activateSpotify() }
-        isStarted = true
-        observeAnchor()
+            MainActor.assumeIsolated { self?.updateGeometry() }
+        })
+        observe()
     }
 
-    // MARK: Posizione nella barra dei menu
-
-    /// L'isola si posa su un elemento vuoto della barra dei menu, a sinistra delle altre icone:
-    /// così è macOS a darle il posto e a spostarla quando le icone cambiano.
-    private func observeAnchor() {
+    private func observe() {
         withObservationTracking {
-            updateAnchor()
+            _ = model.presentation
+            _ = model.closedWidth
         } onChange: { [weak self] in
-            Task { @MainActor [weak self] in self?.observeAnchor() }
+            Task { @MainActor [weak self] in self?.observe() }
         }
+        sync()
     }
 
-    private func updateAnchor() {
-        let frame = anchor.frame
-        let host = islands.values.first { island in frame.map { island.screen.frame.intersects($0) } ?? false }
-            ?? islands.values.first { $0.screen == NSScreen.main }
-            ?? islands.values.first
-        anchor.update(visible: controller.state.isPresentable && host != nil, width: host?.model.closedWidth ?? 0)
+    // MARK: Comparsa e larghezza
 
-        for island in islands.values {
-            let maxX = island === host ? anchor.frame?.maxX : nil
-            if island.model.anchorMaxX != maxX { island.model.anchorMaxX = maxX }
-            let covered = fullScreen.isFullScreen(island.screen)
-            if island.model.isCoveredByFullScreen != covered { island.model.isCoveredByFullScreen = covered }
+    private func sync() {
+        let width = model.closedWidth
+
+        // Sparire: dissolvenza sul posto, poi via l'elemento dalla barra.
+        guard model.presentation == .visible else {
+            guard item != nil, removeTask == nil else { return }
+            withAnimation(Theme.Motion.fade) { model.displayedPresentation = .hidden }
+            removeTask = Task { [weak self] in
+                try? await Task.sleep(for: .seconds(Theme.Motion.fadeDuration))
+                guard let self, !Task.isCancelled else { return }
+                self.removeItem()
+            }
+            return
         }
+
+        removeTask?.cancel()
+        removeTask = nil
+
+        // Comparire: l'elemento nasce già della sua larghezza, il contenuto entra in dissolvenza.
+        guard item != nil else {
+            createItem(width: width)
+            applyWidth(width)
+            DispatchQueue.main.async { [weak self] in
+                withAnimation(Theme.Motion.fade) { self?.model.displayedPresentation = .visible }
+            }
+            return
+        }
+
+        if model.displayedPresentation == .hidden {
+            withAnimation(Theme.Motion.fade) { model.displayedPresentation = .visible }
+        }
+        // Cambio di larghezza: di colpo, insieme all'elemento, come fanno tutte le icone della barra.
+        // Testo e copertina hanno già le loro dissolvenze.
+        applyWidth(width)
     }
 
-    // MARK: Schermi
+    private func applyWidth(_ width: CGFloat) {
+        growWork?.cancel()
+        growWork = nil
+        let size = CGSize(width: width, height: model.geometry.capsuleHeight)
+        guard let item, model.displayedShapeSize.width > 0, width > model.displayedShapeSize.width else {
+            // Più stretto (o primo giro): contenuto ed elemento insieme. macOS lo fa scivolare
+            // verso destra insieme alle icone a sinistra; il contenuto riempie l'elemento e lo segue.
+            withoutAnimation { model.displayedShapeSize = size }
+            if let item, item.length != width { item.length = width }
+            return
+        }
 
-    private func rebuildIslands() {
-        var seen = Set<CGDirectDisplayID>()
-        for screen in NSScreen.screens {
-            guard let id = screen.displayID else { continue }
-            seen.insert(id)
-            if let island = islands[id] {
-                island.update(screen: screen)
-            } else {
-                let model = IslandModel(geometry: IslandGeometry(screen: screen), nowPlaying: controller.state,
-                                        settings: settings, colors: colors,
-                                        controller: controller)
-                islands[id] = IslandWindowController(screen: screen, model: model)
+        // Più largo: macOS fa partire l'elemento allargato dalla posizione di prima e lo fa scivolare
+        // a sinistra (circa 0,3 s), e in quel tempo coprirebbe le icone a destra. Il contenuto resta
+        // largo come prima, appoggiato a sinistra, e scivola con le icone; a barra ferma si allarga
+        // verso destra con la molla, dentro l'elemento.
+        if item.length != width { item.length = width }
+        let work = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            self.growWork = nil
+            withAnimation(Theme.Motion.island) { self.model.displayedShapeSize = size }
+        }
+        growWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + Theme.Capsule.menuBarSlideDuration, execute: work)
+    }
+
+    // MARK: Elemento nella barra dei menu
+
+    private func createItem(width: CGFloat) {
+        let item = NSStatusBar.system.statusItem(withLength: width)
+        // Lo stesso nome di sempre: macOS ricorda la posizione scelta con ⌘ e trascinamento.
+        item.autosaveName = "AtolloIsland"
+        guard let button = item.button else { return }
+        button.title = ""
+        button.image = nil
+        button.isBordered = false
+        // Nessuna evidenziazione: sinistro apre Spotify, destro apre il menu.
+        (button.cell as? NSButtonCell)?.highlightsBy = []
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.target = clickTarget
+        button.action = #selector(ClickTarget.clicked(_:))
+
+        let hostingView = IslandHostingView(rootView: IslandView(model: model))
+        hostingView.frame = button.bounds
+        hostingView.autoresizingMask = [.width, .height]
+        button.addSubview(hostingView)
+
+        self.item = item
+        self.hostingView = hostingView
+        withoutAnimation { model.displayedPresentation = .hidden }
+
+        // Testo bianco o scuro come la barra: macOS adegua l'aspetto del pulsante allo sfondo.
+        appearanceObservation = button.observe(\.effectiveAppearance, options: [.initial, .new]) { button, _ in
+            let isDark = button.effectiveAppearance.bestMatch(from: [.vibrantDark, .vibrantLight, .darkAqua, .aqua])
+                .map { $0 == .vibrantDark || $0 == .darkAqua } ?? true
+            Task { @MainActor [weak self] in
+                guard let self, self.model.isDarkMenuBar != isDark else { return }
+                self.model.isDarkMenuBar = isDark
             }
         }
-        for (id, island) in islands where !seen.contains(id) {
-            island.invalidate()
-            islands[id] = nil
+        if let window = button.window {
+            observers.append(NotificationCenter.default.addObserver(
+                forName: NSWindow.didChangeScreenNotification, object: window, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated { self?.updateGeometry() }
+            })
         }
-        if isStarted { updateAnchor() }
+        updateGeometry()
+    }
+
+    private func removeItem() {
+        removeTask = nil
+        appearanceObservation = nil
+        growWork?.cancel()
+        growWork = nil
+        hostingView?.removeFromSuperview()
+        hostingView = nil
+        if let item { NSStatusBar.system.removeStatusItem(item) }
+        item = nil
+    }
+
+    /// Altezza della barra e colore dell'equalizzatore dipendono dallo schermo su cui è l'elemento.
+    private func updateGeometry() {
+        guard let screen = item?.button?.window?.screen ?? NSScreen.main else { return }
+        let geometry = IslandGeometry(screen: screen)
+        guard geometry != model.geometry else { return }
+        withoutAnimation { model.geometry = geometry }
+        applyWidth(model.closedWidth)
+    }
+
+    private func withoutAnimation(_ body: () -> Void) {
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction, body)
     }
 
     // MARK: Menu del click destro
@@ -110,8 +209,26 @@ final class IslandManager {
         // Il target va tenuto vivo finché il menu è aperto.
         objc_setAssociatedObject(menu, &MenuTarget.key, target, .OBJC_ASSOCIATION_RETAIN)
 
-        // Sotto l'isola, allineato al suo bordo sinistro, come i menu delle altre icone.
+        // Sotto Atollo, allineato al suo bordo sinistro, come i menu delle altre icone.
         menu.popUp(positioning: nil, at: NSPoint(x: 0, y: button.bounds.height + 4), in: button)
+    }
+}
+
+/// Il contenuto dentro il pulsante della barra: solo da guardare, i click vanno al pulsante.
+private final class IslandHostingView: NSHostingView<IslandView> {
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+}
+
+private final class ClickTarget: NSObject {
+    var onRightClick: ((NSStatusBarButton) -> Void)?
+    var onLeftClick: (() -> Void)?
+
+    @objc func clicked(_ sender: NSStatusBarButton) {
+        if NSApp.currentEvent?.type == .rightMouseUp {
+            onRightClick?(sender)
+        } else {
+            onLeftClick?()
+        }
     }
 }
 

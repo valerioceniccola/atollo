@@ -42,20 +42,24 @@ struct IslandView: View {
                 .padding(.leading, (model.isCompact ? Theme.Capsule.compactSpacing : Theme.Capsule.textEqualizerSpacing)
                          - Theme.Capsule.itemSpacing)
         }
-        .padding(.leading, model.geometry.contentInset + Theme.Capsule.extraLeadingInset)
-        .padding(.trailing, model.geometry.contentInset + Theme.Capsule.extraTrailingInset)
+        .padding(.leading, model.leadingInset)
+        .padding(.trailing, model.trailingInset)
         .frame(width: size.width, height: height)
         .animation(Theme.Motion.pause, value: isPlaying)
         // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.
         .background(model.palette.backdrop, in: shape)
         .overlay(shape.strokeBorder(model.palette.stroke, lineWidth: 0.5))
-        .glassEffect((model.palette.clearGlass ? Glass.clear : .regular).tint(model.palette.glassTint), in: shape)
+        .glassEffect(model.palette.usesGlass
+                     ? (model.palette.clearGlass ? Glass.clear : .regular).tint(model.palette.glassTint)
+                     : .identity, in: shape)
         .animation(Theme.Motion.pause, value: model.palette)
         .clipShape(shape)
         .opacity(presentation == .hidden ? 0 : 1)
-        .offset(x: model.renderedOffsetX)
-        .padding(.top, model.geometry.topInset)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        // A sinistra nell'elemento della barra: di solito è largo quanto lei; mentre si allarga
+        // lei resta per un attimo più stretta, appoggiata a sinistra (vedi `IslandManager.applyWidth`).
+        // Nelle anteprime (Impostazioni) sta al centro.
+        .frame(maxWidth: .infinity, maxHeight: .infinity,
+               alignment: model.forcedPresentation == nil ? .leading : .center)
         .environment(\.islandPalette, model.palette)
         .environment(\.colorScheme, model.palette.colorScheme)
     }
@@ -75,14 +79,14 @@ private struct IslandPreview: View {
     }
 
     var body: some View {
-        let window = model.windowSize
         ZStack(alignment: .top) {
             LinearGradient(colors: [.indigo, .teal], startPoint: .topLeading, endPoint: .bottomTrailing)
             Rectangle().fill(.black.opacity(0.25))
                 .frame(height: model.geometry.menuBarHeight)
             IslandView(model: model)
+                .frame(height: model.geometry.menuBarHeight)
         }
-        .frame(width: max(window.width + 120, 460), height: window.height + 30)
+        .frame(width: Theme.Capsule.maxWidth + 160, height: model.geometry.menuBarHeight + 30)
     }
 }
 

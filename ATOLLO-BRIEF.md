@@ -23,14 +23,14 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 - `#Preview` per gli stati: nascosta, visibile, testo lungo, in pausa, MacBook.
 
 ## UI — l'isola
-- **Sempre nella barra dei menu, a sinistra delle altre icone.** Non imita il notch. Un `NSStatusItem` vuoto riserva lo spazio; la capsula è un pannello overlay (NSPanel non attivante, sopra la barra dei menu) agganciato al **bordo destro** di quell'elemento, così cambiando larghezza cresce solo verso sinistra con una sola animazione. Disegnarla dentro l'elemento non va: macOS non sa animare la larghezza di un elemento della barra (lo ridimensiona dal lato sinistro e poi lo riallinea), e la molla diventa uno scivolamento storto.
-- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo. In Impostazioni › Aspetto › Tema c'è anche un aspetto **chiaro**: vetro normale di macOS con un velo bianco al 90% e una tinta bianca al 20%, senza bordo come lo scuro, testo scuro ed equalizzatore scurito (stessa tinta). Default: scuro.
-- Lo spazio nella barra lo riserva un `NSStatusItem` 8 pt più stretto della capsula, che sborda di 4 pt per lato nella spaziatura di sistema per stare più vicina alle icone accanto; la posizione si legge dal pulsante dell'elemento, non dalla sua finestra, e solo a barra ferma.
+- **Un normale elemento della barra dei menu, a sinistra delle altre icone.** Non imita il notch. Il contenuto è disegnato **dentro** il suo `NSStatusItem`, come le altre icone: nessuna finestra propria, così macOS lo gestisce come tutte (schermo intero, notch, barra nascosta, più schermi, app che riordinano le icone).
+- Capsula di **vetro nativo scuro** (`glassEffect` con tinta nera più un velo nero sotto, per la leggibilità), alta circa il 70% della barra, con margine sopra e sotto. Nero neutro: niente tinte prese dallo sfondo. In Impostazioni › Aspetto › Tema c'è anche un aspetto **chiaro**: vetro normale di macOS con un velo bianco al 90% e una tinta bianca al 20%, senza bordo come lo scuro, testo scuro ed equalizzatore scurito (stessa tinta). **Di default nessuna capsula (tema Trasparente)**; in Impostazioni › Aspetto l'interruttore "Capsula" la attiva, e allora si sceglie scura o chiara (l'intro mostra le tre scelte). Il tema **Trasparente**: niente vetro, sfondo né bordo, solo copertina, testo ed equalizzatore sulla barra; il testo è bianco o scuro come quello della barra dei menu (lo dice l'aspetto del pulsante dell'elemento, che macOS adegua allo sfondo). Default: scuro.
+- L'elemento è largo esattamente quanto il contenuto; attorno la spaziatura di sistema.
 - **Visibile finché Spotify è aperto**, anche in pausa; sparisce quando Spotify si chiude. Compare e sparisce con un'animazione.
-- **Nascosta a schermo intero** (video, giochi, Spazi a schermo intero), come la barra dei menu: il pannello non va sugli Spazi a schermo intero e si nasconde quando una finestra copre tutto lo schermo. Visibile durante la condivisione dello schermo.
+- A schermo intero sparisce con la barra dei menu, da sola; visibile durante la condivisione dello schermo.
 - Contenuto: copertina circolare (14 pt, concentrica con l'estremità della capsula), "Titolo · Artista" (titolo semibold, artista grigio), equalizzatore.
-- **Larghezza decisa da noi**, non dall'utente: segue il testo tra 200 e 300 pt; oltre, marquee avanti e indietro (lento, pausa di 3 s ai capi) con dissolvenza ai bordi.
-- Animazioni a molla in stile Apple; i cambi di larghezza con un rimbalzo appena accennato (response 0,3, damping 0,72). La finestra si allarga prima dell'animazione e si restringe solo a molla finita, così la capsula non scatta mai.
+- **Larghezza decisa da noi**, non dall'utente: segue il testo fino a 270 pt, senza larghezza minima; oltre, marquee avanti e indietro (lento, pausa di 3 s ai capi) con dissolvenza ai bordi.
+- I cambi di larghezza (pausa, cambio brano) sono di colpo, insieme all'elemento, come per tutte le icone della barra: macOS non sa animare la larghezza di un elemento (provato: lo ridimensiona dal lato sinistro e poi lo riallinea). Le transizioni di testo e copertina restano.
 - **Cambio brano**: la copertina fa una dissolvenza incrociata; il titolo vecchio svanisce sul posto e il nuovo compare con una leggera sfocatura e pochi punti di spostamento. Discreto.
 - **Pausa**: l'isola si fa compatta (solo copertina ed equalizzatore spento, barre basse e sbiadite, niente icona di pausa); il vetro resta lo stesso.
 - **Spotify aperto o chiuso**: comparsa e scomparsa in dissolvenza rapida, sul posto.
@@ -38,7 +38,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 ### Interazione
 - **Click sinistro**: porta Spotify in primo piano. Nessun effetto al passaggio del mouse.
 - **Click destro**: menu con "Copia link del brano" (da `spotify url`, convertito in link `open.spotify.com`), separatore, "Impostazioni…", "Esci da Atollo".
-- I click li riceve l'elemento nella barra dei menu sotto la capsula: la sua finestra lascia passare il mouse.
+- I click li riceve il pulsante dell'elemento; il contenuto disegnato dentro lascia passare il mouse.
 - Riaprire l'app dal Finder mostra le impostazioni.
 
 ## Equalizzatore

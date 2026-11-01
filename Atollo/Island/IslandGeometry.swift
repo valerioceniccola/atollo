@@ -43,9 +43,4 @@ struct IslandGeometry: Equatable {
     var contentInset: CGFloat {
         (capsuleHeight - Theme.Capsule.artSize) / 2
     }
-
-    /// Distanza dal bordo superiore, per centrare la capsula nella barra dei menu.
-    var topInset: CGFloat {
-        max(((menuBarHeight - capsuleHeight) / 2).rounded(), 1)
-    }
 }

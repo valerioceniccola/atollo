@@ -16,6 +16,16 @@ final class Updater {
         }
     }
 
+    /// Scarica e installa da solo le versioni nuove (alla chiusura di Atollo), senza chiedere.
+    var automaticallyDownloads: Bool {
+        get { access(keyPath: \.automaticallyDownloads); return controller.updater.automaticallyDownloadsUpdates }
+        set {
+            withMutation(keyPath: \.automaticallyDownloads) {
+                controller.updater.automaticallyDownloadsUpdates = newValue
+            }
+        }
+    }
+
     @ObservationIgnored private let controller = SPUStandardUpdaterController(
         startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil
     )

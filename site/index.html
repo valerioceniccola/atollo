@@ -171,6 +171,19 @@
     background: var(--canvas); color: var(--ink); font: 600 15px var(--text);
   }
   .swatches { display: flex; gap: 10px; }
+  /* I tre aspetti, su una barra dei menu in miniatura. */
+  .minibar {
+    width: 100%; display: flex; align-items: center; justify-content: space-around; gap: 10px;
+    padding: 14px 16px; border-radius: 16px;
+    background: linear-gradient(160deg, #7cc4dc 0%, #a9b8ef 55%, #e7c6e4 100%);
+  }
+  .minibar .island { --w: auto; padding-right: 8px; }
+  .island.bare { background: none; box-shadow: none; padding-left: 0; }
+  .island.bare .line, .island.light .line { color: #1d1d1f; }
+  .island.bare .line span, .island.light .line span { color: rgba(29, 29, 31, .6); }
+  .island.light { background: rgba(255, 255, 255, .92); box-shadow: none; }
+  .island.bare .eq i, .island.light .eq i { background: #2f8f4e; }
+  @media (max-width: 734px) { .minibar .island:nth-child(3) { display: none; } }
   .swatches i { width: 22px; height: 22px; border-radius: 50%; display: block; }
 
   /* Chiusura */
@@ -252,7 +265,7 @@
       <p class="lede reveal">Il brano che stai ascoltando, nella barra dei menu. Copertina, titolo, artista. Nient'altro.</p>
       <div class="cta reveal">
         <a class="button download" href="https://github.com/valerioceniccola/atollo/releases/latest">Scarica gratis</a>
-        <small id="requirements">Per macOS 27 · Richiede Spotify per Mac</small>
+        <small><span class="version-label"></span>Per macOS 27 · Richiede Spotify per Mac</small>
       </div>
     </div>
   </section>
@@ -282,8 +295,24 @@
         </article>
         <article class="card reveal">
           <h3>Del colore della tua scrivania.</h3>
-          <p>L'equalizzatore prende il colore dello sfondo. O quello che scegli tu. E si aggiorna da solo.</p>
+          <p>L'equalizzatore prende il colore dello sfondo o della copertina che stai ascoltando. O quello che scegli tu.</p>
           <div class="visual swatches"><i style="background:#5ad27a"></i><i style="background:#64b5ff"></i><i style="background:#bf8cff"></i><i style="background:#ff8fb3"></i><i style="background:#ffb35c"></i></div>
+        </article>
+        <article class="card reveal">
+          <h3>Trasparente o in capsula.</h3>
+          <p>Di base sta sulla barra come le altre icone, con il testo bianco o scuro come la barra. Se preferisci, in una capsula scura o chiara.</p>
+          <div class="visual">
+            <div class="minibar">
+              <div class="island bare" style="--cover: linear-gradient(135deg,#1c2b4a,#5b7db1)"><span class="cover"></span><span class="line">Gravity</span><span class="eq"><i></i><i></i><i></i><i></i></span></div>
+              <div class="island" style="--cover: linear-gradient(135deg,#7a2e1d,#e0763a 60%,#f4c06a)"><span class="cover"></span><span class="line">Gravity</span><span class="eq"><i></i><i></i><i></i><i></i></span></div>
+              <div class="island light" style="--cover: linear-gradient(135deg,#6b8f71,#d9cf9c)"><span class="cover"></span><span class="line">Gravity</span><span class="eq"><i></i><i></i><i></i><i></i></span></div>
+            </div>
+          </div>
+        </article>
+        <article class="card reveal">
+          <h3>Si fa da parte.</h3>
+          <p>Con un video, un gioco o un'app a schermo intero sparisce insieme alla barra dei menu. Sui Mac con il notch si comporta come le altre icone.</p>
+          <div class="visual keys"><span class="chip">⌃</span><span class="chip">⌘</span><span class="chip">F</span></div>
         </article>
       </div>
     </div>
@@ -294,7 +323,7 @@
       <h2 class="reveal">Mettila <em>nella barra.</em></h2>
       <div class="cta reveal">
         <a class="button download" href="https://github.com/valerioceniccola/atollo/releases/latest">Scarica Atollo</a>
-        <small id="version">Gratis, senza account</small>
+        <small><span class="version-label"></span>Gratis, senza account, si aggiorna da sola</small>
       </div>
     </div>
   </section>
@@ -325,7 +354,7 @@
   function widthFor(track) {
     measure.innerHTML = track.title + " <span style='font-weight:400'>· " + track.artist + "</span>";
     // copertina, equalizzatore, spaziature e margini, come in Atollo
-    return Math.min(Math.max(Math.ceil(measure.offsetWidth) + 62, 200), 300);
+    return Math.min(Math.ceil(measure.offsetWidth) + 52, 270);
   }
   function show(track) {
     line.classList.remove("scrolling");
@@ -418,7 +447,8 @@
       const dmg = release.assets.find(a => a.name.endsWith(".dmg"));
       if (!dmg) return;
       document.querySelectorAll("a.download").forEach(a => a.href = dmg.browser_download_url);
-      document.getElementById("version").textContent = "Versione " + release.tag_name.replace(/^v/, "") + " · gratis, senza account";
+      const version = "Versione " + release.tag_name.replace(/^v/, "") + " · ";
+      document.querySelectorAll(".version-label").forEach(el => el.textContent = version);
     })
     .catch(() => {});
 </script>

@@ -23,7 +23,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         SettingsView(nowPlaying: spotify.state, settings: settings, colors: colors, permissions: permissions,
                      updater: updater)
     }
-    private lazy var onboarding = OnboardingWindowController(permissions: permissions) { [unowned self] in
+    private lazy var onboarding = OnboardingWindowController(permissions: permissions, updater: updater) { [unowned self] in
         UserDefaults.standard.set(true, forKey: SettingsKey.didCompleteOnboarding)
         startSpotify()
     }

@@ -5,16 +5,18 @@ import SwiftUI
 final class OnboardingWindowController: NSObject, NSWindowDelegate {
     private var window: NSWindow?
     private let permissions: PermissionsCenter
+    private let updater: Updater?
     private let onFinish: () -> Void
 
-    init(permissions: PermissionsCenter, onFinish: @escaping () -> Void) {
+    init(permissions: PermissionsCenter, updater: Updater?, onFinish: @escaping () -> Void) {
         self.permissions = permissions
+        self.updater = updater
         self.onFinish = onFinish
     }
 
     func show() {
         if window == nil {
-            let view = OnboardingView(permissions: permissions) { [weak self] in self?.finish() }
+            let view = OnboardingView(permissions: permissions, updater: updater) { [weak self] in self?.finish() }
             let hosting = NSHostingController(rootView: view)
             hosting.sizingOptions = [.preferredContentSize]
             let window = NSWindow(contentViewController: hosting)

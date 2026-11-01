@@ -7,16 +7,8 @@ nonisolated enum Theme {
     // MARK: Animazioni
 
     enum Motion {
-        /// Molla dei cambi di larghezza dell'isola: un rimbalzo appena accennato
-        /// sul bordo che si muove, come le animazioni di sistema di Apple.
-        static let springResponse: Double = 0.3
-        static let springDamping: Double = 0.72
-        static var island: Animation { .spring(response: springResponse, dampingFraction: springDamping) }
-
-
-
-        /// Quanto aspettare, dopo un'animazione di chiusura, prima di restringere la finestra.
-        static let windowShrinkDelay: TimeInterval = 0.6
+        /// Molla con cui il contenuto si allarga a barra ferma: un rimbalzo appena accennato.
+        static var island: Animation { .spring(response: 0.3, dampingFraction: 0.72) }
 
         /// Comparsa e scomparsa (Spotify aperto o chiuso): dissolvenza morbida, sul posto.
         static let fadeDuration: TimeInterval = 0.2
@@ -46,8 +38,6 @@ nonisolated enum Theme {
         /// Vetro nativo (Liquid Glass) scurito, con un velo nero sotto per la leggibilità.
         static let glassTint = Color.black.opacity(0.7)
         static let backdrop = Color.black.opacity(0.9)
-        /// Margine trasparente attorno all'isola nella finestra.
-        static let windowMargin: CGFloat = 4
     }
 
     // MARK: Capsula nella barra dei menu
@@ -60,21 +50,10 @@ nonisolated enum Theme {
         static let maxHeight: CGFloat = 24
         static let fallbackMenuBarHeight: CGFloat = 24
 
-        /// Si adatta al testo tra queste due misure; oltre, il testo scorre.
-        static let minWidth: CGFloat = 200
-        static let maxWidth: CGFloat = 300
-        /// Spazio extra attorno alla capsula nella barra dei menu. Negativo: l'elemento riservato è più
-        /// stretto della capsula, che sborda di tanto per lato nella spaziatura di sistema tra le icone,
-        /// così sta più vicina alle icone accanto, alla stessa distanza a sinistra e a destra.
-        static let menuBarItemPadding: CGFloat = -4
-        /// Attesa, dopo l'ultimo movimento, prima di leggere la posizione dell'elemento nella barra dei menu.
-        static let menuBarSettleDelay: TimeInterval = 0.3
-        /// Dopo un cambio di Spazio, quando ricontrollare se c'è un'app a schermo intero.
-        static let fullScreenSettleDelay: TimeInterval = 0.6
-        /// Controllo periodico dello schermo intero (una lettura dell'elenco finestre, leggera).
-        static let fullScreenPollInterval: TimeInterval = 2
-        /// Distanza minima dai bordi dello schermo.
-        static let screenEdgeInset: CGFloat = 8
+        /// Quanto dura lo scivolamento con cui macOS riposiziona un elemento della barra che si allarga.
+        static let menuBarSlideDuration: TimeInterval = 0.32
+        /// Segue il testo fino a questa larghezza; oltre, il testo scorre.
+        static let maxWidth: CGFloat = 270
 
         static let artSize: CGFloat = 14
         /// Copertina circolare: con lo stesso margine sopra, sotto e a sinistra è concentrica
@@ -145,6 +124,8 @@ nonisolated enum Theme {
         var glassTint: Color
         /// Vetro trasparente (`Glass.clear`) invece di quello normale.
         var clearGlass: Bool
+        /// Senza vetro (tema Trasparente): solo il contenuto, sulla barra.
+        var usesGlass = true
         /// Filo sul bordo della capsula.
         var stroke: Color
         var colorScheme: ColorScheme
@@ -168,6 +149,31 @@ nonisolated enum Theme {
             backdrop: .white.opacity(0.9),
             glassTint: .white.opacity(0.2),
             clearGlass: false,
+            stroke: .clear,
+            colorScheme: .light
+        )
+
+        /// Trasparente: niente capsula, solo il contenuto, con il colore del testo della barra dei menu.
+        static let transparentOnDark = Palette(
+            primaryText: .white,
+            secondaryText: .white.opacity(0.7),
+            artworkPlaceholder: .white.opacity(0.14),
+            backdrop: .clear,
+            glassTint: .clear,
+            clearGlass: false,
+            usesGlass: false,
+            stroke: .clear,
+            colorScheme: .dark
+        )
+
+        static let transparentOnLight = Palette(
+            primaryText: light.primaryText,
+            secondaryText: light.secondaryText,
+            artworkPlaceholder: .black.opacity(0.1),
+            backdrop: .clear,
+            glassTint: .clear,
+            clearGlass: false,
+            usesGlass: false,
             stroke: .clear,
             colorScheme: .light
         )
@@ -198,6 +204,8 @@ nonisolated enum Theme {
         static let width: CGFloat = 500
         static let padding: CGFloat = 32
         static let cardPadding: CGFloat = 18
+        /// Margine dentro i riquadri dell'aspetto, attorno alla capsula d'esempio.
+        static let previewInset: CGFloat = 12
         static let logoSize: CGFloat = 96
         static let iconSize: CGFloat = 28
         static let rowSpacing: CGFloat = 16

@@ -4,7 +4,8 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage(SettingsKey.mediaKeysOnlySpotify) private var mediaKeysOnlySpotify = true
     @AppStorage(SettingsKey.equalizerColor) private var equalizerColor = EqualizerColorChoice.automatic
-    @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.dark
+    @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.transparent
+    @AppStorage(SettingsKey.capsuleAppearance) private var capsuleAppearance = IslandAppearance.dark
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
 
     @State private var previewModel: IslandModel
@@ -42,10 +43,14 @@ struct SettingsView: View {
 
             Section {
                 islandPreview
-                Picker("Tema", selection: $appearance) {
-                    ForEach(IslandAppearance.allCases) { Text($0.title).tag($0) }
+                // Di base nessuna capsula: solo il contenuto sulla barra, come le altre icone.
+                Toggle("Capsula", isOn: showsCapsule)
+                if appearance != .transparent {
+                    Picker("Tema", selection: capsuleTheme) {
+                        ForEach(IslandAppearance.capsuleStyles) { Text($0.title).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
                 }
-                .pickerStyle(.segmented)
                 colorPicker
             } header: {
                 Text("Aspetto")
@@ -71,6 +76,20 @@ struct SettingsView: View {
         }
     }
 
+    private var showsCapsule: Binding<Bool> {
+        Binding(
+            get: { appearance != .transparent },
+            set: { appearance = $0 ? capsuleAppearance : .transparent }
+        )
+    }
+
+    private var capsuleTheme: Binding<IslandAppearance> {
+        Binding(
+            get: { appearance == .transparent ? capsuleAppearance : appearance },
+            set: { appearance = $0; capsuleAppearance = $0 }
+        )
+    }
+
     // MARK: Anteprima dal vivo
 
     private var islandPreview: some View {
@@ -82,6 +101,7 @@ struct SettingsView: View {
                 .fill(.black.opacity(0.25))
                 .frame(height: previewModel.geometry.menuBarHeight)
             IslandView(model: previewModel)
+                .frame(height: previewModel.geometry.menuBarHeight)
         }
         .frame(height: Theme.Settings.previewHeight)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
@@ -185,6 +205,8 @@ private struct UpdatesSection: View {
         Section {
             LabeledContent("Versione", value: Updater.currentVersion)
             Toggle("Controlla gli aggiornamenti automaticamente", isOn: $updater.automaticallyChecks)
+            Toggle("Aggiorna automaticamente", isOn: $updater.automaticallyDownloads)
+                .disabled(!updater.automaticallyChecks)
             LabeledContent("Aggiornamenti") {
                 Button("Controlla ora…") { updater.checkForUpdates() }
                     .disabled(!updater.canCheckForUpdates)

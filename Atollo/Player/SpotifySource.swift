@@ -67,12 +67,11 @@ final class SpotifySource: PlayerSource {
     func nextTrack() { bridge.perform { $0.nextTrack?() } }
     func previousTrack() { bridge.perform { $0.previousTrack?() } }
 
+    /// Come un clic sull'icona nel Dock: porta Spotify davanti e gli manda la "riapertura",
+    /// così ripristina anche la finestra ridotta nel Dock o chiusa (`activate()` da solo non lo fa).
     func activateApp() {
-        if let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleIdentifier).first {
-            app.activate()
-        } else if let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) {
-            NSWorkspace.shared.openApplication(at: url, configuration: .init())
-        }
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier) else { return }
+        NSWorkspace.shared.openApplication(at: url, configuration: .init())
     }
 
     func shareURL(for track: TrackInfo) -> URL? {

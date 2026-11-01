@@ -2,13 +2,11 @@ import AppKit
 import Observation
 import SwiftUI
 
-/// Stato di un'isola su uno schermo: forma e posizione. Col click sinistro non fa nulla;
-/// il click destro apre il menu (lo gestisce `IslandManager`).
+/// Stato di Atollo nella barra dei menu: contenuto e larghezza.
 ///
-/// `presentation` e `shapeSize(for:)` dicono come l'isola *deve* essere;
-/// i valori `displayed…` dicono come è disegnata adesso. È il window controller a portare
-/// i secondi verso i primi, dentro `withAnimation`, dopo aver preparato la finestra:
-/// così l'isola non viene mai tagliata né scatta mentre cambia forma.
+/// `presentation` e `closedWidth` dicono come deve essere; i valori `displayed…` come è disegnato adesso.
+/// È `IslandManager` a portare i secondi verso i primi: la larghezza cambia di colpo insieme
+/// all'elemento della barra (come tutte le icone), la comparsa con una dissolvenza.
 @Observable
 final class IslandModel {
     enum Presentation: Equatable { case hidden, visible }
@@ -20,24 +18,15 @@ final class IslandModel {
     @ObservationIgnored let colors: EqualizerColorProvider?
     @ObservationIgnored weak var controller: SpotifyController?
 
-    /// Bordo destro dell'elemento riservato nella barra dei menu, in coordinate globali.
-    /// È il bordo che resta fermo quando l'elemento cambia larghezza: agganciando lì l'isola,
-    /// un cambio di larghezza è una sola animazione verso sinistra, senza correzioni dopo.
-    /// `nil` se l'elemento non è su questo schermo: allora l'isola qui non si mostra.
-    var anchorMaxX: CGFloat?
+    /// La barra dei menu ha il testo bianco: il tema Trasparente fa lo stesso.
+    var isDarkMenuBar = true
 
-    /// C'è un'app a schermo intero su questo schermo: la barra dei menu è nascosta e Atollo con lei.
-    var isCoveredByFullScreen = false
-
-    // MARK: Stato disegnato (lo aggiorna il window controller)
+    // MARK: Stato disegnato (lo aggiorna IslandManager)
 
     var displayedPresentation: Presentation = .hidden
     var displayedShapeSize: CGSize = .zero
-    /// Centro dell'isola disegnata e centro della finestra, in coordinate globali.
-    var displayedMidX: CGFloat = 0
-    var windowMidX: CGFloat = 0
 
-    /// Per anteprime e impostazioni: forza uno stato senza finestra.
+    /// Per anteprime e impostazioni: forza uno stato senza elemento nella barra.
     var forcedPresentation: Presentation?
 
     init(geometry: IslandGeometry, nowPlaying: NowPlayingState, settings: AppSettings,
@@ -50,31 +39,16 @@ final class IslandModel {
         self.controller = controller
     }
 
-    /// Visibile finché Spotify è aperto, sullo schermo che ha l'elemento nella barra dei menu,
-    /// tranne quando lì c'è un'app a schermo intero.
+    /// Visibile finché Spotify è aperto.
     var presentation: Presentation {
         if let forcedPresentation { return forcedPresentation }
-        guard nowPlaying.isPresentable, anchorMaxX != nil, !isCoveredByFullScreen else { return .hidden }
-        return .visible
+        return nowPlaying.isPresentable ? .visible : .hidden
     }
 
     var renderedPresentation: Presentation { forcedPresentation ?? displayedPresentation }
 
     var renderedShapeSize: CGSize {
         forcedPresentation.map { shapeSize(for: $0) } ?? displayedShapeSize
-    }
-
-    /// Spostamento orizzontale dell'isola dentro la finestra.
-    var renderedOffsetX: CGFloat { forcedPresentation == nil ? displayedMidX - windowMidX : 0 }
-
-    /// Centro voluto in coordinate globali: a filo del bordo destro dell'elemento, senza uscire dallo schermo.
-    func targetMidX(for presentation: Presentation) -> CGFloat {
-        let width = shapeSize(for: presentation).width
-        let anchor = anchorMaxX.map { $0 - Theme.Capsule.menuBarItemPadding - width / 2 } ?? geometry.screenFrame.midX
-        let half = width / 2 + Theme.Capsule.screenEdgeInset
-        let screen = geometry.screenFrame
-        guard screen.width > 2 * half else { return screen.midX }
-        return anchor.clamped(to: (screen.minX + half)...(screen.maxX - half))
     }
 
     // MARK: Testo ed equalizzatore
@@ -86,12 +60,12 @@ final class IslandModel {
     var artworkID: ObjectIdentifier? { nowPlaying.artwork.map(ObjectIdentifier.init) }
     var artist: String { nowPlaying.track?.artist ?? "" }
 
-    var palette: Theme.Palette { settings.islandAppearance.palette }
+    var palette: Theme.Palette { settings.islandAppearance.palette(darkMenuBar: isDarkMenuBar) }
 
     var equalizerColor: Color {
         let color = colors?.nsColor(for: geometry.displayID, artworkColor: nowPlaying.artworkColor) ?? EqualizerColorChoice.blue.presetColor ?? .systemBlue
-        guard settings.islandAppearance == .light, var oklch = OKLCH(color) else { return Color(nsColor: color) }
-        // I colori pensati per il nero sono chiari: sull'isola chiara si scuriscono, stessa tinta.
+        guard palette.colorScheme == .light, var oklch = OKLCH(color) else { return Color(nsColor: color) }
+        // I colori pensati per il nero sono chiari: con il testo scuro si scuriscono, stessa tinta.
         oklch.l = min(oklch.l, Theme.EqualizerColor.lightMaxLightness)
         oklch.c = max(oklch.c, Theme.EqualizerColor.lightMinChroma)
         return Color(nsColor: oklch.nsColor)
@@ -108,28 +82,30 @@ final class IslandModel {
         }
     }
 
-    /// Dimensione fissa della finestra: ci sta l'isola più larga, con i margini.
-    var windowSize: CGSize {
-        let margin = Theme.Island.windowMargin
-        return CGSize(
-            width: (Theme.Capsule.maxWidth + 2 * margin).rounded(.up),
-            height: (geometry.topInset + geometry.capsuleHeight + margin).rounded(.up)
-        )
+    /// Margini ai lati del contenuto. Con la capsula la copertina è concentrica con l'estremità;
+    /// senza capsula (Trasparente) niente margini: attorno basta la spaziatura di sistema, come per le altre icone.
+    var leadingInset: CGFloat {
+        palette.usesGlass ? geometry.contentInset + Theme.Capsule.extraLeadingInset : 0
+    }
+
+    var trailingInset: CGFloat {
+        palette.usesGlass ? geometry.contentInset + Theme.Capsule.extraTrailingInset : 0
     }
 
     /// In pausa (o senza brano) l'isola si stringe a copertina e barre.
     var isCompact: Bool { !nowPlaying.isPlaying || nowPlaying.track == nil }
 
-    /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo tra la minima e la massima.
+    /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo fino alla massima.
     var closedWidth: CGFloat {
-        let padding = 2 * geometry.contentInset + Theme.Capsule.extraLeadingInset + Theme.Capsule.extraTrailingInset
+        let padding = leadingInset + trailingInset
         if isCompact {
             return (padding + Theme.Capsule.artSize + Theme.Capsule.compactSpacing + EqualizerView.width).rounded(.up)
         }
         let fixed = padding + Theme.Capsule.artSize + EqualizerView.width
             + Theme.Capsule.artTextSpacing + Theme.Capsule.textEqualizerSpacing
-        let ideal = fixed + textWidth + Theme.Marquee.fadeWidth / 2
-        return ideal.clamped(to: Theme.Capsule.minWidth...Theme.Capsule.maxWidth).rounded(.up)
+        // Se il testo ci sta non scorre e non ha sfumature: basta un punto di margine per gli arrotondamenti.
+        let ideal = fixed + textWidth + 1
+        return min(ideal, Theme.Capsule.maxWidth).rounded(.up)
     }
 
     private var textWidth: CGFloat {
