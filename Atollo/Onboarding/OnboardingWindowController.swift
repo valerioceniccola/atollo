@@ -27,8 +27,7 @@ final class OnboardingWindowController: NSObject, NSWindowDelegate {
             window.center()
             self.window = window
         }
-        NSApp.activate()
-        window?.makeKeyAndOrderFront(nil)
+        window?.bringToFront()
     }
 
     private func finish() {

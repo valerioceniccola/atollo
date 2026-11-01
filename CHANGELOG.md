@@ -4,10 +4,11 @@
 
 - A schermo intero (video, giochi, app a schermo intero) Atollo si nasconde, come la barra dei menu; anche con i giochi che coprono la barra, come quelli avviati con CrossOver
 - Nuovo colore per l'equalizzatore: "Dalla copertina", che cambia a ogni brano
-- Capsula più compatta, con lo stesso margine ai due lati
+- Più vicina alle icone accanto nella barra dei menu, con spazi interni rifiniti
+- Le Impostazioni si aprono sempre davanti alle altre finestre
 - Nel menu del clic destro c'è "Esci da Atollo"
 - I titoli lunghi scorrono più lentamente e si fermano 3 secondi a ogni lato
-- Il tema chiaro è più bianco e più marcato, e come quello scuro non ha più il bordo
+- Il tema chiaro è quasi bianco pieno, e come quello scuro non ha più il bordo
 - Nelle Impostazioni la scelta fra chiaro e scuro si chiama "Tema"
 
 ## 0.1.1

@@ -122,11 +122,12 @@ final class IslandModel {
 
     /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo tra la minima e la massima.
     var closedWidth: CGFloat {
-        let padding = 2 * Theme.Capsule.horizontalInset
+        let padding = 2 * geometry.contentInset + Theme.Capsule.extraLeadingInset + Theme.Capsule.extraTrailingInset
         if isCompact {
-            return (padding + Theme.Capsule.artSize + Theme.Capsule.itemSpacing + EqualizerView.width).rounded(.up)
+            return (padding + Theme.Capsule.artSize + Theme.Capsule.compactSpacing + EqualizerView.width).rounded(.up)
         }
-        let fixed = padding + Theme.Capsule.artSize + EqualizerView.width + 2 * Theme.Capsule.itemSpacing
+        let fixed = padding + Theme.Capsule.artSize + EqualizerView.width
+            + Theme.Capsule.artTextSpacing + Theme.Capsule.textEqualizerSpacing
         let ideal = fixed + textWidth + Theme.Marquee.fadeWidth / 2
         return ideal.clamped(to: Theme.Capsule.minWidth...Theme.Capsule.maxWidth).rounded(.up)
     }

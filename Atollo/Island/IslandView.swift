@@ -32,13 +32,18 @@ struct IslandView: View {
                     }
                     .clipped()
                     .animation(Theme.Motion.trackChange, value: model.trackID)
+                    .padding(.leading, Theme.Capsule.artTextSpacing - Theme.Capsule.itemSpacing)
                     .transition(.opacity.animation(Theme.Motion.compactText))
                 }
             }
 
             EqualizerView(isPlaying: isPlaying, color: model.equalizerColor, height: Theme.Equalizer.height)
+                // Con il testo l'equalizzatore gli sta un po' più vicino; in pausa un filo più staccato dalla copertina.
+                .padding(.leading, (model.isCompact ? Theme.Capsule.compactSpacing : Theme.Capsule.textEqualizerSpacing)
+                         - Theme.Capsule.itemSpacing)
         }
-        .padding(.horizontal, Theme.Capsule.horizontalInset)
+        .padding(.leading, model.geometry.contentInset + Theme.Capsule.extraLeadingInset)
+        .padding(.trailing, model.geometry.contentInset + Theme.Capsule.extraTrailingInset)
         .frame(width: size.width, height: height)
         .animation(Theme.Motion.pause, value: isPlaying)
         // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.

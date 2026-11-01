@@ -63,8 +63,10 @@ nonisolated enum Theme {
         /// Si adatta al testo tra queste due misure; oltre, il testo scorre.
         static let minWidth: CGFloat = 200
         static let maxWidth: CGFloat = 300
-        /// Spazio extra attorno all'isola nella barra dei menu: zero, basta la spaziatura di sistema tra le icone.
-        static let menuBarItemPadding: CGFloat = 0
+        /// Spazio extra attorno alla capsula nella barra dei menu. Negativo: l'elemento riservato è più
+        /// stretto della capsula, che sborda di tanto per lato nella spaziatura di sistema tra le icone,
+        /// così sta più vicina alle icone accanto, alla stessa distanza a sinistra e a destra.
+        static let menuBarItemPadding: CGFloat = -4
         /// Attesa, dopo l'ultimo movimento, prima di leggere la posizione dell'elemento nella barra dei menu.
         static let menuBarSettleDelay: TimeInterval = 0.3
         /// Dopo un cambio di Spazio, quando ricontrollare se c'è un'app a schermo intero.
@@ -79,8 +81,15 @@ nonisolated enum Theme {
         /// con l'estremità della capsula.
         static let artRadius: CGFloat = artSize / 2
         static let itemSpacing: CGFloat = 7
-        /// Margine ai lati del contenuto, uguale a sinistra (copertina) e a destra (equalizzatore).
-        static let horizontalInset: CGFloat = 1
+        /// Con il testo: copertina un filo più staccata, equalizzatore un po' più vicino all'artista.
+        static let artTextSpacing: CGFloat = 8.5
+        static let textEqualizerSpacing: CGFloat = 5
+        /// In pausa, tra copertina ed equalizzatore spento.
+        static let compactSpacing: CGFloat = 8.5
+        /// Margine aggiuntivo ai lati del contenuto, oltre a quello della copertina:
+        /// appena un filo a sinistra, un po' di più a destra dopo l'equalizzatore.
+        static let extraLeadingInset: CGFloat = 0.5
+        static let extraTrailingInset: CGFloat = 3
 
     }
 
@@ -155,8 +164,8 @@ nonisolated enum Theme {
             primaryText: Color(red: 0.11, green: 0.11, blue: 0.12),
             secondaryText: Color(red: 0.11, green: 0.11, blue: 0.12).opacity(0.6),
             artworkPlaceholder: .black.opacity(0.1),
-            // Vetro smerigliato rinforzato da un velo chiaro, senza bordo come quello scuro.
-            backdrop: .white.opacity(0.3),
+            // Velo quasi bianco sotto il vetro, senza bordo come quello scuro.
+            backdrop: .white.opacity(0.9),
             glassTint: .white.opacity(0.2),
             clearGlass: false,
             stroke: .clear,

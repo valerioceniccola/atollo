@@ -20,7 +20,17 @@ final class SettingsWindowController {
             window.center()
             self.window = window
         }
+        window?.bringToFront()
+    }
+}
+
+extension NSWindow {
+    /// Davanti a tutto, sullo Spazio attuale. Atollo non ha icona nel Dock: con l'attivazione
+    /// cooperativa di macOS a volte `activate()` non basta e la finestra resterebbe dietro le altre.
+    func bringToFront() {
+        collectionBehavior.insert(.moveToActiveSpace)
         NSApp.activate()
-        window?.makeKeyAndOrderFront(nil)
+        makeKeyAndOrderFront(nil)
+        orderFrontRegardless()
     }
 }
