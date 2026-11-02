@@ -25,8 +25,6 @@ enum IslandAppearance: String, CaseIterable, Identifiable {
     }
 
     /// Trasparente segue la barra dei menu: testo bianco se la barra ce l'ha bianco, scuro altrimenti.
-    static let capsuleStyles: [IslandAppearance] = [.dark, .light]
-
     /// Nell'intro le tre scelte stanno insieme: si dice anche che scuro e chiaro sono una capsula.
     var choiceTitle: String {
         switch self {

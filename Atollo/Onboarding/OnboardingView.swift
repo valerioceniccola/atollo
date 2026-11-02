@@ -87,7 +87,7 @@ struct OnboardingView: View {
 }
 
 /// Un riquadro con l'isola nell'aspetto scelto, sopra uno sfondo da scrivania.
-private struct AppearanceOption: View {
+struct AppearanceOption: View {
     let appearance: IslandAppearance
     let isSelected: Bool
     let action: () -> Void

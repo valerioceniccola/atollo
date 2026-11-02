@@ -34,6 +34,10 @@ struct ArtworkView: View {
         }
         .frame(width: size, height: size)
         .clipShape(shape)
+        // Un filo interno del colore del testo, come le copertine di Musica: invisibile di solito,
+        // disegna il cerchio quando la copertina ha lo stesso colore dello sfondo (nera su nero, bianca su bianco).
+        .overlay(shape.strokeBorder(palette.primaryText.opacity(Theme.Capsule.artStrokeOpacity),
+                                    lineWidth: Theme.Capsule.artStrokeWidth))
     }
 }
 

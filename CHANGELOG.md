@@ -1,5 +1,10 @@
 # Novità di Atollo
 
+## 0.2.1
+
+- La copertina ha un filo sottile attorno: si vede anche quando è nera su sfondo nero o bianca su bianco
+- Nelle Impostazioni l'aspetto si sceglie come nella schermata di benvenuto: Trasparente, Capsula scura o Capsula chiara
+
 ## 0.2.0
 
 - Atollo ora è un vero elemento della barra dei menu: a schermo intero, con il notch e con le app che riordinano le icone si comporta come le altre

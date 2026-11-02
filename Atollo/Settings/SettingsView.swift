@@ -43,14 +43,18 @@ struct SettingsView: View {
 
             Section {
                 islandPreview
-                // Di base nessuna capsula: solo il contenuto sulla barra, come le altre icone.
-                Toggle("Capsula", isOn: showsCapsule)
-                if appearance != .transparent {
-                    Picker("Tema", selection: capsuleTheme) {
-                        ForEach(IslandAppearance.capsuleStyles) { Text($0.title).tag($0) }
+                // Le stesse tre scelte della schermata di intro.
+                HStack(spacing: 10) {
+                    ForEach(IslandAppearance.allCases) { option in
+                        AppearanceOption(appearance: option, isSelected: appearance == option) {
+                            withAnimation(Theme.Motion.pause) {
+                                appearance = option
+                                if option != .transparent { capsuleAppearance = option }
+                            }
+                        }
                     }
-                    .pickerStyle(.segmented)
                 }
+                .padding(.vertical, 4)
                 colorPicker
             } header: {
                 Text("Aspetto")
@@ -74,20 +78,6 @@ struct SettingsView: View {
         .onAppear {
             openAtLogin = SMAppService.mainApp.status == .enabled
         }
-    }
-
-    private var showsCapsule: Binding<Bool> {
-        Binding(
-            get: { appearance != .transparent },
-            set: { appearance = $0 ? capsuleAppearance : .transparent }
-        )
-    }
-
-    private var capsuleTheme: Binding<IslandAppearance> {
-        Binding(
-            get: { appearance == .transparent ? capsuleAppearance : appearance },
-            set: { appearance = $0; capsuleAppearance = $0 }
-        )
     }
 
     // MARK: Anteprima dal vivo

@@ -59,6 +59,8 @@ nonisolated enum Theme {
         /// Copertina circolare: con lo stesso margine sopra, sotto e a sinistra è concentrica
         /// con l'estremità della capsula.
         static let artRadius: CGFloat = artSize / 2
+        static let artStrokeWidth: CGFloat = 0.5
+        static let artStrokeOpacity: Double = 0.15
         static let itemSpacing: CGFloat = 7
         /// Con il testo: copertina un filo più staccata, equalizzatore un po' più vicino all'artista.
         static let artTextSpacing: CGFloat = 8.5
