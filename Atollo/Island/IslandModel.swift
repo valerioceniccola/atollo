@@ -62,7 +62,11 @@ final class IslandModel {
 
     var palette: Theme.Palette { settings.islandAppearance.palette(darkMenuBar: isDarkMenuBar) }
 
-    var equalizerColor: Color {
+    var equalizerColor: Color { equalizerColor(for: palette) }
+
+    /// Il colore scelto nelle Impostazioni, adattato a un aspetto (anche diverso da quello attuale,
+    /// per le anteprime dei tre aspetti).
+    func equalizerColor(for palette: Theme.Palette) -> Color {
         let color = colors?.nsColor(for: geometry.displayID, artworkColor: nowPlaying.artworkColor) ?? EqualizerColorChoice.blue.presetColor ?? .systemBlue
         guard palette.colorScheme == .light, var oklch = OKLCH(color) else { return Color(nsColor: color) }
         // I colori pensati per il nero sono chiari: con il testo scuro si scuriscono, stessa tinta.

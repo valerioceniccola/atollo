@@ -61,6 +61,8 @@ nonisolated enum Theme {
         static let artRadius: CGFloat = artSize / 2
         static let artStrokeWidth: CGFloat = 0.5
         static let artStrokeOpacity: Double = 0.15
+        /// Sulla barra di un monitor non attivo, come le altre icone spente.
+        static let inactiveMenuBarOpacity: CGFloat = 0.45
         static let itemSpacing: CGFloat = 7
         /// Con il testo: copertina un filo più staccata, equalizzatore un po' più vicino all'artista.
         static let artTextSpacing: CGFloat = 8.5

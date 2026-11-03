@@ -38,6 +38,13 @@ final class IslandManager {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.updateGeometry() }
         })
+        // macOS rifà a volte la copia per l'altro monitor: si ricontrolla dopo ogni giro dell'app,
+        // costa due confronti.
+        observers.append(NotificationCenter.default.addObserver(
+            forName: NSApplication.didUpdateNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.dimInactiveCopies() }
+        })
         observe()
     }
 
@@ -149,14 +156,17 @@ final class IslandManager {
                 self.model.isDarkMenuBar = isDark
             }
         }
-        if let window = button.window {
-            observers.append(NotificationCenter.default.addObserver(
-                forName: NSWindow.didChangeScreenNotification, object: window, queue: .main
-            ) { [weak self] _ in
-                MainActor.assumeIsolated { self?.updateGeometry() }
-            })
+        // Con più monitor macOS dà all'elemento una finestra per barra e sposta il pulsante in quella
+        // del monitor attivo; nelle altre resta una copia. Quando il pulsante cambia finestra
+        // si aggiornano misure e copie.
+        hostingView.onWindowChange = { [weak self] in
+            self?.updateGeometry()
+            self?.dimInactiveCopies()
         }
         updateGeometry()
+        dimInactiveCopies()
+        // La copia per l'altro monitor macOS la crea poco dopo l'elemento.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in self?.dimInactiveCopies() }
     }
 
     private func removeItem() {
@@ -168,6 +178,19 @@ final class IslandManager {
         hostingView = nil
         if let item { NSStatusBar.system.removeStatusItem(item) }
         item = nil
+    }
+
+    /// Sui monitor non attivi macOS spegne le icone della barra; le copie di Atollo si schiariscono
+    /// allo stesso modo. Le copie sono un'immagine del pulsante dentro la finestra della barra di
+    /// quel monitor: si schiarisce il loro contenuto (l'opacità della finestra macOS la ignora).
+    /// Quella con il pulsante (monitor attivo) resta piena.
+    private func dimInactiveCopies() {
+        guard let live = item?.button?.window else { return }
+        for window in NSApp.windows where String(describing: type(of: window)).contains("StatusBarWindow") {
+            guard let content = window.contentView else { continue }
+            let alpha = window === live ? 1 : Theme.Capsule.inactiveMenuBarOpacity
+            if content.alphaValue != alpha { content.alphaValue = alpha }
+        }
     }
 
     /// Altezza della barra e colore dell'equalizzatore dipendono dallo schermo su cui è l'elemento.
@@ -216,7 +239,15 @@ final class IslandManager {
 
 /// Il contenuto dentro il pulsante della barra: solo da guardare, i click vanno al pulsante.
 private final class IslandHostingView: NSHostingView<IslandView> {
+    /// Il pulsante è passato alla finestra della barra di un altro monitor.
+    var onWindowChange: (() -> Void)?
+
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        onWindowChange?()
+    }
 }
 
 private final class ClickTarget: NSObject {

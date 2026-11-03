@@ -10,7 +10,7 @@ Le versioni escono come **Release** di questa repository. Atollo controlla all'a
 
 In alternativa basta chiedere a Claude "rilascia la 0.2.0": fa lui tutti i passi.
 
-Si costruisce sul Mac e non su GitHub Actions perché Atollo richiede Xcode 27 e macOS 27.
+Si costruisce sul Mac e non su GitHub Actions perché Atollo si compila con Xcode 27 (il Mac che costruisce deve avere macOS 27).
 
 ## Configurazione iniziale (una volta sola)
 
@@ -34,4 +34,4 @@ Conserva il file in un posto sicuro (es. 1Password) e poi cancellalo.
 
 ## Prima installazione per un amico
 
-Dalla pagina **Releases** scarica `Atollo-x.y.z.dmg`, aprilo e trascina Atollo in Applicazioni. Dalla volta successiva gli aggiornamenti arrivano da soli. Servono macOS 27 e Spotify per Mac.
+Dalla pagina **Releases** scarica `Atollo-x.y.z.dmg`, aprilo e trascina Atollo in Applicazioni. Dalla volta successiva gli aggiornamenti arrivano da soli. Servono macOS 26 o successivo e Spotify per Mac.

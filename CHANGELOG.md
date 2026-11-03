@@ -1,5 +1,11 @@
 # Novità di Atollo
 
+## 0.2.2
+
+- Ora funziona anche su macOS 26
+- Con più monitor, sulla barra del monitor non attivo Atollo si schiarisce come le altre icone
+- Nelle Impostazioni le anteprime dell'aspetto mostrano il colore dell'equalizzatore che hai scelto
+
 ## 0.2.1
 
 - La copertina ha un filo sottile attorno: si vede anche quando è nera su sfondo nero o bianca su bianco

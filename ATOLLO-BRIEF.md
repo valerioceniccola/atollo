@@ -1,6 +1,6 @@
 # Atollo — brief di progetto
 
-App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano di **Spotify** in una piccola isola nella barra dei menu. Uso personale e per pochi amici; niente App Store.
+App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 26) che mostra il brano di **Spotify** nella barra dei menu. Uso personale e per pochi amici; niente App Store.
 
 ## Ambito
 - **Solo Spotify** (bundle ID `com.spotify.client`). Tutto è pensato e rifinito per Spotify.
@@ -28,6 +28,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 27) che mostra il brano 
 - L'elemento è largo esattamente quanto il contenuto; attorno la spaziatura di sistema.
 - **Visibile finché Spotify è aperto**, anche in pausa; sparisce quando Spotify si chiude. Compare e sparisce con un'animazione.
 - A schermo intero sparisce con la barra dei menu, da sola; visibile durante la condivisione dello schermo.
+- Con più monitor macOS mostra sugli altri una copia (un'immagine) di Atollo: la copia si schiarisce al 45%, come le icone spente delle barre non attive; sul monitor attivo resta piena.
 - Contenuto: copertina circolare (14 pt, concentrica con l'estremità della capsula, con un filo interno di mezzo punto al 15% del colore del testo, perché si veda anche nera su nero o bianca su bianco), "Titolo · Artista" (titolo semibold, artista grigio), equalizzatore.
 - **Larghezza decisa da noi**, non dall'utente: segue il testo fino a 270 pt, senza larghezza minima; oltre, marquee avanti e indietro (lento, pausa di 3 s ai capi) con dissolvenza ai bordi.
 - I cambi di larghezza (pausa, cambio brano) sono di colpo, insieme all'elemento, come per tutte le icone della barra: macOS non sa animare la larghezza di un elemento (provato: lo ridimensiona dal lato sinistro e poi lo riallinea). Le transizioni di testo e copertina restano.
@@ -76,4 +77,4 @@ Al primo avvio: icona, breve descrizione, lista dei permessi con "Non concesso" 
 Testi sincronizzati (LRCLIB), "Mi piace" e coda tramite la Web API di Spotify, avviso al cambio brano.
 
 ## Da fare a ogni passo
-Compila ed esegui per verificare. Su macOS 27 controlla che le API usate (status item, event tap, glass) funzionino ancora come previsto.
+Compila ed esegui per verificare. Su macOS 26 e 27 controlla che le API usate (status item, event tap, glass) funzionino ancora come previsto.

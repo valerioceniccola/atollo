@@ -46,7 +46,8 @@ struct SettingsView: View {
                 // Le stesse tre scelte della schermata di intro.
                 HStack(spacing: 10) {
                     ForEach(IslandAppearance.allCases) { option in
-                        AppearanceOption(appearance: option, isSelected: appearance == option) {
+                        AppearanceOption(appearance: option, isSelected: appearance == option,
+                                         equalizerColor: previewModel.equalizerColor(for: option.palette())) {
                             withAnimation(Theme.Motion.pause) {
                                 appearance = option
                                 if option != .transparent { capsuleAppearance = option }

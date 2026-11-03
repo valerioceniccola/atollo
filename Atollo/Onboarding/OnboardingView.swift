@@ -90,6 +90,8 @@ struct OnboardingView: View {
 struct AppearanceOption: View {
     let appearance: IslandAppearance
     let isSelected: Bool
+    /// Colore dell'equalizzatore; senza, il verde d'esempio dell'intro.
+    var equalizerColor: Color? = nil
     let action: () -> Void
 
     var body: some View {
@@ -106,7 +108,7 @@ struct AppearanceOption: View {
                             .frame(width: Theme.Capsule.artSize, height: Theme.Capsule.artSize)
                         TrackLineText(title: "Gravity", artist: "")
                             .lineLimit(1)
-                        EqualizerView(isPlaying: true, color: palette.colorScheme == .dark ? .green : Color(red: 0.1, green: 0.55, blue: 0.25),
+                        EqualizerView(isPlaying: true, color: equalizerColor ?? (palette.colorScheme == .dark ? .green : Color(red: 0.1, green: 0.55, blue: 0.25)),
                                       height: Theme.Equalizer.height)
                     }
                     .padding(.horizontal, 4)

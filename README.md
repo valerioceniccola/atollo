@@ -27,7 +27,7 @@ Atollo mette nella barra dei menu una capsula di vetro scuro con la copertina, i
 2. Aprilo e trascina **Atollo** nella cartella **Applicazioni**.
 3. Apri Atollo: la schermata di benvenuto ti chiede i due permessi che servono.
 
-Servono macOS 27 e l'app Spotify per Mac.
+Servono macOS 26 (o successivo) e l'app Spotify per Mac.
 
 ## Come si usa
 

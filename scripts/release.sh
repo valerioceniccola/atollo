@@ -85,7 +85,7 @@ cat > "$OUT/appcast.xml" <<XML
       <pubDate>$(LC_ALL=C date -u "+%a, %d %b %Y %H:%M:%S +0000")</pubDate>
       <sparkle:version>$BUILD</sparkle:version>
       <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
-      <sparkle:minimumSystemVersion>27.0</sparkle:minimumSystemVersion>
+      <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
       <description><![CDATA[$NOTES_HTML]]></description>
       <enclosure url="https://github.com/$REPO/releases/download/$TAG/Atollo-$VERSION.zip" type="application/octet-stream" $SIGNATURE/>
     </item>
