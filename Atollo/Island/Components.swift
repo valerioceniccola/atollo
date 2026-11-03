@@ -165,34 +165,109 @@ struct EqualizerView: View {
     }
 
     var body: some View {
-        // Una sola vista per entrambi gli stati: così le barre scendono e risalgono animate.
-        TimelineView(.animation(paused: !isPlaying)) { context in
-            bars(isPlaying ? decorativeLevels(at: context.date) : Theme.Equalizer.offLevels)
+        EqualizerBars(isPlaying: isPlaying, color: NSColor(color), height: height)
+            .opacity(isPlaying ? 1 : Theme.Equalizer.offOpacity)
+            .animation(Theme.Equalizer.stateAnimation, value: isPlaying)
+            .frame(width: Self.width, height: height)
+    }
+}
+
+/// Le barre sono livelli Core Animation con animazioni ripetute: le muove il sistema grafico,
+/// senza ridisegnare la vista a ogni fotogramma. Animarle da SwiftUI (TimelineView) ricalcolava
+/// tutto Atollo fino a 120 volte al secondo: decine di punti di CPU mentre la musica suona.
+private struct EqualizerBars: NSViewRepresentable {
+    let isPlaying: Bool
+    let color: NSColor
+    let height: CGFloat
+
+    func makeNSView(context: Context) -> EqualizerBarsView { EqualizerBarsView() }
+
+    func updateNSView(_ view: EqualizerBarsView, context: Context) {
+        view.update(isPlaying: isPlaying, color: color, height: height)
+    }
+}
+
+private final class EqualizerBarsView: NSView {
+    private var bars: [CALayer] = []
+    private var isPlaying: Bool?
+    private var height: CGFloat = 0
+
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        wantsLayer = true
+        for _ in 0..<Theme.Equalizer.barCount {
+            let bar = CALayer()
+            bar.cornerRadius = Theme.Equalizer.barWidth / 2
+            bar.cornerCurve = .continuous
+            layer?.addSublayer(bar)
+            bars.append(bar)
         }
-        .opacity(isPlaying ? 1 : Theme.Equalizer.offOpacity)
-        .animation(Theme.Equalizer.stateAnimation, value: isPlaying)
-        .frame(width: Self.width, height: height)
     }
 
-    private func bars(_ values: [CGFloat]) -> some View {
-        HStack(alignment: .center, spacing: Theme.Equalizer.barSpacing) {
-            ForEach(0..<Theme.Equalizer.barCount, id: \.self) { index in
-                let value = index < values.count ? values[index] : Theme.Equalizer.minLevel
-                Capsule(style: .continuous)
-                    .fill(color)
-                    .frame(width: Theme.Equalizer.barWidth,
-                           height: max(Theme.Equalizer.barWidth, height * value.clamped(to: 0...1)))
-            }
+    required init?(coder: NSCoder) { fatalError() }
+
+    override var isFlipped: Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+
+    override func layout() {
+        super.layout()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        for (index, bar) in bars.enumerated() {
+            let x = CGFloat(index) * (Theme.Equalizer.barWidth + Theme.Equalizer.barSpacing)
+            bar.bounds = CGRect(x: 0, y: 0, width: Theme.Equalizer.barWidth, height: height)
+            bar.position = CGPoint(x: x + Theme.Equalizer.barWidth / 2, y: bounds.midY)
         }
-        .frame(height: height)
+        CATransaction.commit()
     }
 
-    private func decorativeLevels(at date: Date) -> [CGFloat] {
-        let t = date.timeIntervalSinceReferenceDate
-        return (0..<Theme.Equalizer.barCount).map { i in
-            let primary = sin(t * Theme.Equalizer.decorativeSpeeds[i] + Theme.Equalizer.decorativePhases[i])
-            let secondary = sin(t * Theme.Equalizer.decorativeSecondarySpeeds[i] + Theme.Equalizer.decorativePhases[i] * 2)
-            return CGFloat(0.5 + 0.3 * primary + 0.15 * secondary)
+    func update(isPlaying: Bool, color: NSColor, height: CGFloat) {
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        let cgColor = color.cgColor
+        bars.forEach { $0.backgroundColor = cgColor }
+        CATransaction.commit()
+        if self.height != height {
+            self.height = height
+            needsLayout = true
         }
+        guard self.isPlaying != isPlaying else { return }
+        self.isPlaying = isPlaying
+        for (index, bar) in bars.enumerated() { animate(bar, index: index, playing: isPlaying) }
+    }
+
+    /// In riproduzione ogni barra segue una sua sequenza di altezze casuali e ricomincia dopo qualche
+    /// secondo, con durate diverse per barra: il ritorno non si nota. In pausa scende piano
+    /// al livello spento e resta ferma.
+    private func animate(_ bar: CALayer, index: Int, playing: Bool) {
+        let key = "transform.scale.y"
+        let current = (bar.presentation()?.value(forKeyPath: key) as? CGFloat) ?? Theme.Equalizer.offLevels[index]
+        bar.removeAllAnimations()
+        guard playing else {
+            let settle = CABasicAnimation(keyPath: key)
+            settle.fromValue = current
+            settle.toValue = Theme.Equalizer.offLevels[index]
+            settle.duration = 0.3
+            settle.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            bar.setValue(Theme.Equalizer.offLevels[index], forKeyPath: key)
+            bar.add(settle, forKey: "settle")
+            return
+        }
+        // Sequenza chiusa: l'ultimo valore è uguale al primo, così il giro riparte senza scatto.
+        let steps = Theme.Equalizer.decorativeSteps
+        var levels = (0..<steps).map { _ in
+            CGFloat.random(in: Theme.Equalizer.decorativeLow...1)
+        }
+        levels.append(levels[0])
+        let pulse = CAKeyframeAnimation(keyPath: key)
+        pulse.values = levels
+        pulse.calculationMode = .cubic
+        pulse.duration = Theme.Equalizer.decorativeLoopDurations[index]
+        pulse.repeatCount = .infinity
+        pulse.beginTime = CACurrentMediaTime() - Double.random(in: 0..<pulse.duration)
+        // Altezza "a riposo" sotto l'animazione: è quella che si vede nella copia ferma che macOS
+        // mostra sulla barra degli altri monitor (una foto di Atollo, senza animazioni).
+        bar.setValue(Theme.Equalizer.stillLevels[index], forKeyPath: key)
+        bar.add(pulse, forKey: "pulse")
     }
 }

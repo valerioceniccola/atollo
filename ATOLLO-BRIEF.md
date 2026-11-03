@@ -44,6 +44,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 26) che mostra il brano 
 
 ## Equalizzatore
 - 4 barre arrotondate, centrate in verticale, **sempre decorative**.
+- Animate da Core Animation (livelli con animazioni a fotogrammi chiave di altezze casuali, ripetute ogni 4-6 s con durate diverse per barra): nessun ridisegno di SwiftUI per fotogramma, CPU vicina a zero mentre suona. Sulla copia degli altri monitor (un'immagine) le barre restano ferme ad altezze diverse.
 - **Mai catturare l'audio**: niente process tap. La cattura fa comparire l'indicatore viola di registrazione di macOS, che non deve mai comparire.
 
 ### Colore dell'equalizzatore (Impostazioni)

@@ -1,5 +1,11 @@
 # Novità di Atollo
 
+## 0.2.3
+
+- Consuma molto meno: mentre la musica suona la CPU resta vicina a zero (prima l'equalizzatore la impegnava di continuo)
+- L'equalizzatore si muove in modo più naturale, con altezze casuali
+- Sul monitor non attivo Atollo è più chiaro
+
 ## 0.2.2
 
 - Ora funziona anche su macOS 26

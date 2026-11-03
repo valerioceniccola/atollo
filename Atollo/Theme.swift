@@ -105,14 +105,17 @@ nonisolated enum Theme {
         static let barWidth: CGFloat = 2.5
         static let barSpacing: CGFloat = 2
         static let height: CGFloat = 12
-        static let minLevel: CGFloat = 0.18
         /// In pausa l'equalizzatore è spento: barre basse e sbiadite.
         static let offLevels: [CGFloat] = [0.2, 0.2, 0.2, 0.2]
         static let offOpacity: Double = 0.4
-        /// Animazione decorativa: velocità (rad/s) e fasi per barra.
-        static let decorativeSpeeds: [Double] = [7.1, 9.3, 6.2, 8.4]
-        static let decorativeSecondarySpeeds: [Double] = [3.3, 2.1, 4.4, 2.7]
-        static let decorativePhases: [Double] = [0, 1.7, 3.1, 4.6]
+        /// Animazione decorativa: ogni barra segue altezze casuali tra il livello basso e il massimo,
+        /// circa sei al secondo, e ricomincia dopo qualche secondo. Durate diverse per barra,
+        /// così non si muovono mai insieme e il giro non si riconosce.
+        static let decorativeLow: CGFloat = 0.25
+        static let decorativeSteps = 28
+        static let decorativeLoopDurations: [CFTimeInterval] = [4.7, 5.3, 4.3, 5.9]
+        /// Barre ferme ma in riproduzione (copia sugli altri monitor): altezze diverse, come una foto.
+        static let stillLevels: [CGFloat] = [0.55, 0.9, 0.45, 0.7]
         static var stateAnimation: Animation { .spring(response: 0.4, dampingFraction: 0.8) }
     }
 
