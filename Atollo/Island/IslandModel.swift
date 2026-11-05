@@ -39,10 +39,11 @@ final class IslandModel {
         self.controller = controller
     }
 
-    /// Visibile finché Spotify è aperto.
+    /// Visibile finché Spotify è aperto; se l'utente lo sceglie, solo mentre suona.
     var presentation: Presentation {
         if let forcedPresentation { return forcedPresentation }
-        return nowPlaying.isPresentable ? .visible : .hidden
+        guard nowPlaying.isPresentable else { return .hidden }
+        return settings.hidesWhenPaused && !nowPlaying.isPlaying ? .hidden : .visible
     }
 
     var renderedPresentation: Presentation { forcedPresentation ?? displayedPresentation }

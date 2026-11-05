@@ -63,13 +63,21 @@ final class IslandManager {
     private func sync() {
         let width = model.closedWidth
 
-        // Sparire: dissolvenza sul posto, poi via l'elemento dalla barra.
+        // Sparire: dissolvenza sul posto, poi via l'elemento dalla barra. Se è la pausa a nasconderlo
+        // (Spotify resta aperto), si stringe come sempre e si dissolve verso la fine.
         guard model.presentation == .visible else {
             guard item != nil, removeTask == nil else { return }
-            withAnimation(Theme.Motion.fade) { model.displayedPresentation = .hidden }
+            let isPausing = model.nowPlaying.isPresentable
+            if isPausing { applyWidth(width) }
             removeTask = Task { [weak self] in
+                if isPausing {
+                    try? await Task.sleep(for: .seconds(Theme.Motion.pauseHideDelay))
+                    guard !Task.isCancelled else { return }
+                }
+                guard let self else { return }
+                withAnimation(Theme.Motion.fade) { self.model.displayedPresentation = .hidden }
                 try? await Task.sleep(for: .seconds(Theme.Motion.fadeDuration))
-                guard let self, !Task.isCancelled else { return }
+                guard !Task.isCancelled else { return }
                 self.removeItem()
             }
             return
@@ -178,6 +186,8 @@ final class IslandManager {
         hostingView = nil
         if let item { NSStatusBar.system.removeStatusItem(item) }
         item = nil
+        // Il prossimo elemento nasce già della sua larghezza, senza allargarsi.
+        withoutAnimation { model.displayedShapeSize = .zero }
     }
 
     /// Sui monitor non attivi macOS spegne le icone della barra; le copie di Atollo si schiariscono

@@ -7,6 +7,7 @@ enum SettingsKey {
     static let islandAppearance = "islandAppearance"
     /// L'ultima capsula scelta (scura o chiara), per riattivarla uguale.
     static let capsuleAppearance = "capsuleAppearance"
+    static let hidesWhenPaused = "hidesWhenPaused"
     static let openAtLogin = "openAtLogin"
     static let didPromptAccessibility = "didPromptAccessibility"
     static let didCompleteOnboarding = "didCompleteOnboarding"
@@ -102,6 +103,7 @@ final class AppSettings {
     private(set) var mediaKeysOnlySpotify = true
     private(set) var equalizerColor = EqualizerColorChoice.automatic
     private(set) var islandAppearance = IslandAppearance.transparent
+    private(set) var hidesWhenPaused = false
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var observer: NSObjectProtocol?
@@ -112,6 +114,7 @@ final class AppSettings {
             SettingsKey.equalizerColor: EqualizerColorChoice.automatic.rawValue,
             SettingsKey.islandAppearance: IslandAppearance.transparent.rawValue,
             SettingsKey.capsuleAppearance: IslandAppearance.dark.rawValue,
+            SettingsKey.hidesWhenPaused: false,
             SettingsKey.openAtLogin: false,
         ])
     }
@@ -136,6 +139,9 @@ final class AppSettings {
 
         let appearance = IslandAppearance(rawValue: defaults.string(forKey: SettingsKey.islandAppearance) ?? "") ?? .transparent
         if appearance != islandAppearance { islandAppearance = appearance }
+
+        let hides = defaults.bool(forKey: SettingsKey.hidesWhenPaused)
+        if hides != hidesWhenPaused { hidesWhenPaused = hides }
     }
 }
 

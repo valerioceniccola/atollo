@@ -6,6 +6,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.equalizerColor) private var equalizerColor = EqualizerColorChoice.automatic
     @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.transparent
     @AppStorage(SettingsKey.capsuleAppearance) private var capsuleAppearance = IslandAppearance.dark
+    @AppStorage(SettingsKey.hidesWhenPaused) private var hidesWhenPaused = false
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
 
     @State private var previewModel: IslandModel
@@ -59,6 +60,14 @@ struct SettingsView: View {
                 colorPicker
             } header: {
                 Text("Aspetto")
+            }
+
+            Section {
+                Toggle("Nascondi quando Spotify è in pausa", isOn: $hidesWhenPaused)
+            } footer: {
+                Text("Atollo ricompare appena riparte la musica. Mentre è nascosto, le Impostazioni si aprono riaprendo Atollo dal Finder.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
 
             Section {

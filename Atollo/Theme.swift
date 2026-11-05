@@ -13,6 +13,9 @@ nonisolated enum Theme {
         /// Comparsa e scomparsa (Spotify aperto o chiuso): dissolvenza morbida, sul posto.
         static let fadeDuration: TimeInterval = 0.2
         static var fade: Animation { .easeInOut(duration: fadeDuration) }
+        /// Con "nascondi in pausa": dopo quanto parte la dissolvenza, mentre si sta stringendo
+        /// (lo scivolamento dura circa 0,3 s), così finisce insieme a lui.
+        static let pauseHideDelay: TimeInterval = 0.15
 
         /// Cambio brano: la copertina si dissolve nella nuova; il testo vecchio svanisce sul posto
         /// e il nuovo affiora con una leggera sfocatura e uno spostamento di pochi punti.

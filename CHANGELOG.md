@@ -1,5 +1,9 @@
 # Novità di Atollo
 
+## 0.2.4
+
+- Nuova opzione nelle Impostazioni: "Nascondi quando Spotify è in pausa". Atollo sparisce dalla barra e ricompare quando riparte la musica
+
 ## 0.2.3
 
 - Consuma molto meno: mentre la musica suona la CPU resta vicina a zero (prima l'equalizzatore la impegnava di continuo)

@@ -33,7 +33,7 @@ App macOS nativa (Swift/SwiftUI, Xcode 27, target macOS 26) che mostra il brano 
 - **Larghezza decisa da noi**, non dall'utente: segue il testo fino a 270 pt, senza larghezza minima; oltre, marquee avanti e indietro (lento, pausa di 3 s ai capi) con dissolvenza ai bordi.
 - I cambi di larghezza (pausa, cambio brano) sono di colpo, insieme all'elemento, come per tutte le icone della barra: macOS non sa animare la larghezza di un elemento (provato: lo ridimensiona dal lato sinistro e poi lo riallinea). Le transizioni di testo e copertina restano.
 - **Cambio brano**: la copertina fa una dissolvenza incrociata; il titolo vecchio svanisce sul posto e il nuovo compare con una leggera sfocatura e pochi punti di spostamento. Discreto.
-- **Pausa**: l'isola si fa compatta (solo copertina ed equalizzatore spento, barre basse e sbiadite, niente icona di pausa); il vetro resta lo stesso.
+- **Pausa**: l'isola si fa compatta (solo copertina ed equalizzatore spento, barre basse e sbiadite, niente icona di pausa); il vetro resta lo stesso. Con "Nascondi quando Spotify è in pausa" (Impostazioni, spento di default) si stringe come sempre e verso la fine si dissolve, poi esce dalla barra; ricompare in dissolvenza quando riparte la musica.
 - **Spotify aperto o chiuso**: comparsa e scomparsa in dissolvenza rapida, sul posto.
 
 ### Interazione
