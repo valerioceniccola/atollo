@@ -23,6 +23,16 @@ struct IslandView: View {
                 }
                 .animation(Theme.Motion.artworkChange, value: model.artworkID)
 
+                // Compare solo con la ripetizione accesa; un clic la spegne (vedi `IslandManager`).
+                if model.showsRepeatIcon {
+                    Image(systemName: "repeat")
+                        .font(.system(size: Theme.Capsule.repeatIconSize, weight: .semibold))
+                        .foregroundStyle(model.palette.primaryText)
+                        .frame(width: Theme.Capsule.repeatIconWidth)
+                        .padding(.leading, Theme.Capsule.repeatSpacing - Theme.Capsule.itemSpacing)
+                        .transition(.opacity)
+                }
+
                 // In pausa l'isola è compatta: niente testo, solo copertina e barre spente, affiancate.
                 if !model.isCompact {
                     ZStack {
@@ -46,6 +56,7 @@ struct IslandView: View {
         .padding(.trailing, model.trailingInset)
         .frame(width: size.width, height: height)
         .animation(Theme.Motion.pause, value: isPlaying)
+        .animation(Theme.Motion.compactText, value: model.showsRepeatIcon)
         // Vetro scuro con un velo nero sotto, sempre uguale: leggibile anche su sfondi chiari.
         .background(model.palette.backdrop, in: shape)
         .overlay(shape.strokeBorder(model.palette.stroke, lineWidth: 0.5))

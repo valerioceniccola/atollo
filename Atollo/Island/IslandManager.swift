@@ -31,7 +31,7 @@ final class IslandManager {
     }
 
     func start() {
-        clickTarget.onLeftClick = { [weak self] in self?.controller.activateSpotify() }
+        clickTarget.onLeftClick = { [weak self] button in self?.handleLeftClick(on: button) }
         clickTarget.onRightClick = { [weak self] button in self?.showMenu(at: button) }
         observers.append(NotificationCenter.default.addObserver(
             forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main
@@ -52,9 +52,11 @@ final class IslandManager {
         withObservationTracking {
             _ = model.presentation
             _ = model.closedWidth
+            _ = settings.showsRepeatIndicator
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in self?.observe() }
         }
+        controller.setRepeatTracking(settings.showsRepeatIndicator)
         sync()
     }
 
@@ -218,6 +220,18 @@ final class IslandManager {
         withTransaction(transaction, body)
     }
 
+    // MARK: Clic
+
+    /// Sull'avviso di ripetizione la spegne; altrove apre Spotify.
+    private func handleLeftClick(on button: NSStatusBarButton) {
+        let x = NSApp.currentEvent.map { button.convert($0.locationInWindow, from: nil).x } ?? 0
+        if model.repeatHitRange?.contains(x) == true {
+            controller.turnOffRepeat()
+        } else {
+            controller.activateSpotify()
+        }
+    }
+
     // MARK: Menu del click destro
 
     private func showMenu(at button: NSStatusBarButton) {
@@ -262,13 +276,13 @@ private final class IslandHostingView: NSHostingView<IslandView> {
 
 private final class ClickTarget: NSObject {
     var onRightClick: ((NSStatusBarButton) -> Void)?
-    var onLeftClick: (() -> Void)?
+    var onLeftClick: ((NSStatusBarButton) -> Void)?
 
     @objc func clicked(_ sender: NSStatusBarButton) {
         if NSApp.currentEvent?.type == .rightMouseUp {
             onRightClick?(sender)
         } else {
-            onLeftClick?()
+            onLeftClick?(sender)
         }
     }
 }

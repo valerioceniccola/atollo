@@ -1,5 +1,10 @@
 # Novità di Atollo
 
+## 0.2.5
+
+- Se su Spotify la ripetizione è attiva, accanto alla copertina compare un'icona: cliccala per disattivarla
+- Nuova opzione nelle Impostazioni: "Avvisa se la ripetizione è attiva", per togliere l'avviso se non ti serve
+
 ## 0.2.4
 
 - Nuova opzione nelle Impostazioni: "Nascondi quando Spotify è in pausa". Atollo sparisce dalla barra e ricompare quando riparte la musica

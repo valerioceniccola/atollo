@@ -8,10 +8,21 @@ final class SpotifySource: PlayerSource {
 
     let bundleIdentifier = SpotifySource.bundleID
     var onSnapshot: ((PlayerSnapshot?) -> Void)?
+    var onRepeatingChange: ((Bool) -> Void)?
 
     private let bridge = SpotifyBridge()
     private var observers: [NSObjectProtocol] = []
     private var refreshGeneration = 0
+    var tracksRepeating = true {
+        didSet {
+            guard tracksRepeating != oldValue else { return }
+            updateRepeatTimer()
+            if tracksRepeating { readRepeating() }
+        }
+    }
+    private var repeatTimer: Timer?
+    private var isSpotifyFrontmost = false
+    private var isPlaying = false
 
     var isRunning: Bool { SpotifyBridge.isSpotifyRunning }
 
@@ -46,11 +57,28 @@ final class SpotifySource: PlayerSource {
             guard Self.isSpotify(note) else { return }
             MainActor.assumeIsolated {
                 self?.refreshGeneration += 1
+                self?.isPlaying = false
+                self?.updateRepeatTimer()
                 self?.onSnapshot?(nil)
             }
         })
 
+        observers.append(workspace.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
+        ) { [weak self] note in
+            let isSpotify = Self.isSpotify(note)
+            MainActor.assumeIsolated {
+                guard let self, self.isSpotifyFrontmost != isSpotify else { return }
+                self.isSpotifyFrontmost = isSpotify
+                self.updateRepeatTimer()
+                // Entrando o uscendo da Spotify lo stato si aggiorna subito.
+                if self.tracksRepeating { self.readRepeating() }
+            }
+        })
+
         refresh()
+        isSpotifyFrontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier == Self.bundleID
+        updateRepeatTimer()
     }
 
     func refresh() {
@@ -59,13 +87,40 @@ final class SpotifySource: PlayerSource {
         bridge.fetchSnapshot { [weak self] snapshot in
             guard let self, generation == self.refreshGeneration else { return }
             Log.spotify.info("snapshot: \(String(describing: snapshot?.status), privacy: .public) \(snapshot?.track?.title ?? "-", privacy: .public)")
+            self.isPlaying = snapshot?.status == .playing
+            self.updateRepeatTimer()
             self.onSnapshot?(snapshot)
+        }
+    }
+
+    /// Spotify non avvisa quando la ripetizione cambia: si rilegge solo quel valore. In primo piano spesso,
+    /// dietro alle altre app solo mentre suona; in pausa dietro o con Spotify chiuso, niente controlli.
+    private func updateRepeatTimer() {
+        let interval = !tracksRepeating ? nil
+            : isSpotifyFrontmost ? Theme.Repeat.frontmostPollInterval
+            : isPlaying ? Theme.Repeat.backgroundPollInterval : nil
+        guard interval != repeatTimer?.timeInterval else { return }
+        repeatTimer?.invalidate()
+        repeatTimer = nil
+        guard let interval else { return }
+        let timer = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.readRepeating() }
+        }
+        timer.tolerance = interval * Theme.Repeat.pollToleranceRatio
+        RunLoop.main.add(timer, forMode: .common)
+        repeatTimer = timer
+    }
+
+    private func readRepeating() {
+        bridge.fetchRepeating { [weak self] isRepeating in
+            if let isRepeating { self?.onRepeatingChange?(isRepeating) }
         }
     }
 
     func playPause() { bridge.perform { $0.playpause?() } }
     func nextTrack() { bridge.perform { $0.nextTrack?() } }
     func previousTrack() { bridge.perform { $0.previousTrack?() } }
+    func turnOffRepeat() { bridge.perform { $0.setRepeating?(false) } }
 
     /// Come un clic sull'icona nel Dock: porta Spotify davanti e gli manda la "riapertura",
     /// così ripristina anche la finestra ridotta nel Dock o chiusa (`activate()` da solo non lo fa).
@@ -119,6 +174,13 @@ nonisolated private final class SpotifyBridge: @unchecked Sendable {
         }
     }
 
+    func fetchRepeating(_ completion: @escaping @MainActor (Bool?) -> Void) {
+        queue.async { [self] in
+            let isRepeating = app()?.repeating
+            DispatchQueue.main.async { completion(isRepeating) }
+        }
+    }
+
     func perform(_ command: @escaping @Sendable (SpotifyApplicationScripting) -> Void) {
         queue.async { [self] in
             guard let app = app() else { return }
@@ -128,6 +190,7 @@ nonisolated private final class SpotifyBridge: @unchecked Sendable {
 
     private func readSnapshot() -> PlayerSnapshot? {
         guard let app = app() else { return nil }
+        let isRepeating = app.repeating ?? false
         let status: PlaybackStatus
         switch app.playerState {
         case .playing: status = .playing
@@ -135,7 +198,7 @@ nonisolated private final class SpotifyBridge: @unchecked Sendable {
         case .stopped, .none: status = .stopped
         }
         guard status != .stopped, let track = app.currentTrack else {
-            return PlayerSnapshot(status: status, track: nil)
+            return PlayerSnapshot(status: status, track: nil, isRepeating: isRepeating)
         }
         let info = TrackInfo(
             title: track.name ?? "",
@@ -146,9 +209,9 @@ nonisolated private final class SpotifyBridge: @unchecked Sendable {
         )
         // Brano non ancora caricato: si tiene il precedente invece di mostrare un titolo vuoto.
         guard !info.title.isEmpty else {
-            return PlayerSnapshot(status: status, track: nil)
+            return PlayerSnapshot(status: status, track: nil, isRepeating: isRepeating)
         }
-        return PlayerSnapshot(status: status, track: info)
+        return PlayerSnapshot(status: status, track: info, isRepeating: isRepeating)
     }
 
 }

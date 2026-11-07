@@ -21,6 +21,8 @@ import ScriptingBridge
 @objc nonisolated protocol SpotifyApplicationScripting {
     @objc optional var currentTrack: SpotifyTrackScripting { get }
     @objc optional var playerState: SpotifyPlayerState { get }
+    @objc optional var repeating: Bool { get }
+    @objc optional func setRepeating(_ repeating: Bool)
     @objc optional func playpause()
     @objc optional func nextTrack()
     @objc optional func previousTrack()

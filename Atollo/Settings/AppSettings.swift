@@ -8,6 +8,7 @@ enum SettingsKey {
     /// L'ultima capsula scelta (scura o chiara), per riattivarla uguale.
     static let capsuleAppearance = "capsuleAppearance"
     static let hidesWhenPaused = "hidesWhenPaused"
+    static let showsRepeatIndicator = "showsRepeatIndicator"
     static let openAtLogin = "openAtLogin"
     static let didPromptAccessibility = "didPromptAccessibility"
     static let didCompleteOnboarding = "didCompleteOnboarding"
@@ -104,6 +105,7 @@ final class AppSettings {
     private(set) var equalizerColor = EqualizerColorChoice.automatic
     private(set) var islandAppearance = IslandAppearance.transparent
     private(set) var hidesWhenPaused = false
+    private(set) var showsRepeatIndicator = true
 
     @ObservationIgnored private let defaults: UserDefaults
     @ObservationIgnored private var observer: NSObjectProtocol?
@@ -115,6 +117,7 @@ final class AppSettings {
             SettingsKey.islandAppearance: IslandAppearance.transparent.rawValue,
             SettingsKey.capsuleAppearance: IslandAppearance.dark.rawValue,
             SettingsKey.hidesWhenPaused: false,
+            SettingsKey.showsRepeatIndicator: true,
             SettingsKey.openAtLogin: false,
         ])
     }
@@ -142,6 +145,9 @@ final class AppSettings {
 
         let hides = defaults.bool(forKey: SettingsKey.hidesWhenPaused)
         if hides != hidesWhenPaused { hidesWhenPaused = hides }
+
+        let showsRepeat = defaults.bool(forKey: SettingsKey.showsRepeatIndicator)
+        if showsRepeat != showsRepeatIndicator { showsRepeatIndicator = showsRepeat }
     }
 }
 

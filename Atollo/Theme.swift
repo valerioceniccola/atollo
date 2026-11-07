@@ -77,6 +77,21 @@ nonisolated enum Theme {
         static let extraLeadingInset: CGFloat = 0.5
         static let extraTrailingInset: CGFloat = 3
 
+        /// Avviso della ripetizione, tra la copertina e il nome del brano.
+        static let repeatIconSize: CGFloat = 10
+        static let repeatIconWidth: CGFloat = 13
+        static let repeatSpacing: CGFloat = 8.5
+    }
+
+    // MARK: Ripetizione
+
+    enum Repeat {
+        /// Ogni quanto si rilegge lo stato: spesso con Spotify in primo piano, dove di solito si cambia;
+        /// più di rado mentre suona dietro alle altre app (si può cambiare dal telefono).
+        static let frontmostPollInterval: TimeInterval = 1
+        static let backgroundPollInterval: TimeInterval = 5
+        /// Quanto il sistema può spostare il controllo per accorparlo ad altri risvegli, in frazione dell'intervallo.
+        static let pollToleranceRatio: Double = 0.2
     }
 
     // MARK: Testo

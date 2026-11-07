@@ -16,6 +16,7 @@ nonisolated struct TrackInfo: Equatable, Sendable {
 nonisolated struct PlayerSnapshot: Equatable, Sendable {
     var status: PlaybackStatus
     var track: TrackInfo?
+    var isRepeating = false
 }
 
 /// Un'app che riproduce musica. Oggi c'è solo `SpotifySource`; il protocollo esiste
@@ -26,6 +27,10 @@ protocol PlayerSource: AnyObject {
 
     /// Chiamato sul main thread a ogni cambiamento. `nil` significa che il player non è aperto.
     var onSnapshot: ((PlayerSnapshot?) -> Void)? { get set }
+    /// Chiamato sul main thread con lo stato della ripetizione, che il player non notifica.
+    var onRepeatingChange: ((Bool) -> Void)? { get set }
+    /// Se controllare la ripetizione: con l'avviso spento non si interroga il player.
+    var tracksRepeating: Bool { get set }
 
     func start()
     func refresh()
@@ -33,6 +38,7 @@ protocol PlayerSource: AnyObject {
     func playPause()
     func nextTrack()
     func previousTrack()
+    func turnOffRepeat()
 
     /// Link condivisibile del brano (es. `https://open.spotify.com/track/…`).
     func shareURL(for track: TrackInfo) -> URL?

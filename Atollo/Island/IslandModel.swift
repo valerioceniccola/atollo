@@ -97,12 +97,28 @@ final class IslandModel {
         palette.usesGlass ? geometry.contentInset + Theme.Capsule.extraTrailingInset : 0
     }
 
+    /// L'avviso compare con la ripetizione accesa, se l'utente lo vuole.
+    var showsRepeatIcon: Bool { settings.showsRepeatIndicator && nowPlaying.isRepeating }
+
+    /// Spazio dell'avviso di ripetizione, quando c'è.
+    private var repeatWidth: CGFloat {
+        showsRepeatIcon ? Theme.Capsule.repeatSpacing + Theme.Capsule.repeatIconWidth : 0
+    }
+
+    /// Il tratto dell'elemento su cui un clic spegne la ripetizione, invece di aprire Spotify:
+    /// l'icona più metà dello spazio ai suoi lati.
+    var repeatHitRange: ClosedRange<CGFloat>? {
+        guard showsRepeatIcon else { return nil }
+        let start = leadingInset + Theme.Capsule.artSize + Theme.Capsule.repeatSpacing / 2
+        return start...(start + Theme.Capsule.repeatSpacing / 2 + Theme.Capsule.repeatIconWidth + Theme.Capsule.artTextSpacing / 2)
+    }
+
     /// In pausa (o senza brano) l'isola si stringe a copertina e barre.
     var isCompact: Bool { !nowPlaying.isPlaying || nowPlaying.track == nil }
 
     /// Larghezza della capsula: compatta in pausa, altrimenti segue il testo fino alla massima.
     var closedWidth: CGFloat {
-        let padding = leadingInset + trailingInset
+        let padding = leadingInset + trailingInset + repeatWidth
         if isCompact {
             return (padding + Theme.Capsule.artSize + Theme.Capsule.compactSpacing + EqualizerView.width).rounded(.up)
         }

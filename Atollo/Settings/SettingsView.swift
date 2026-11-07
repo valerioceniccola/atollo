@@ -7,6 +7,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKey.islandAppearance) private var appearance = IslandAppearance.transparent
     @AppStorage(SettingsKey.capsuleAppearance) private var capsuleAppearance = IslandAppearance.dark
     @AppStorage(SettingsKey.hidesWhenPaused) private var hidesWhenPaused = false
+    @AppStorage(SettingsKey.showsRepeatIndicator) private var showsRepeatIndicator = true
     @AppStorage(SettingsKey.openAtLogin) private var openAtLogin = false
 
     @State private var previewModel: IslandModel
@@ -66,6 +67,14 @@ struct SettingsView: View {
                 Toggle("Nascondi quando Spotify è in pausa", isOn: $hidesWhenPaused)
             } footer: {
                 Text("Atollo ricompare appena riparte la musica. Mentre è nascosto, le Impostazioni si aprono riaprendo Atollo dal Finder.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Toggle("Avvisa se la ripetizione è attiva", isOn: $showsRepeatIndicator)
+            } footer: {
+                Text("Se su Spotify la ripetizione è attiva, accanto alla copertina compare un'icona: cliccala per disattivarla.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }

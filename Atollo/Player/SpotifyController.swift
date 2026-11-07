@@ -10,6 +10,8 @@ final class NowPlayingState {
     var artwork: NSImage?
     /// Colore dominante della copertina, già leggibile sul nero; `nil` se è quasi grigia o manca.
     var artworkColor: NSColor?
+    /// La ripetizione è accesa su Spotify.
+    var isRepeating = false
     /// Vero mentre l'isola va mostrata: cioè finché Spotify è aperto.
     var isPresentable = false
 
@@ -46,6 +48,15 @@ final class SpotifyController {
     init(source: PlayerSource = SpotifySource()) {
         self.source = source
         source.onSnapshot = { [weak self] in self?.apply($0) }
+        source.onRepeatingChange = { [weak self] isRepeating in
+            guard let self, self.state.isRepeating != isRepeating else { return }
+            self.state.isRepeating = isRepeating
+        }
+    }
+
+    /// Con l'avviso spento non serve interrogare Spotify.
+    func setRepeatTracking(_ enabled: Bool) {
+        source.tracksRepeating = enabled
     }
 
     func start() {
@@ -69,6 +80,12 @@ final class SpotifyController {
     func nextTrack() { source.nextTrack() }
     func previousTrack() { source.previousTrack() }
 
+    func turnOffRepeat() {
+        // L'icona sparisce subito; il controllo successivo conferma.
+        state.isRepeating = false
+        source.turnOffRepeat()
+    }
+
     var shareURL: URL? { state.track.flatMap(source.shareURL(for:)) }
     func activateSpotify() { source.activateApp() }
 
@@ -80,12 +97,14 @@ final class SpotifyController {
             // invece di passare un attimo al nome di ripiego.
             pendingPause?.cancel()
             state.isRunning = false
+            state.isRepeating = false
             state.status = .stopped
             state.isPresentable = false
             return
         }
 
         state.isRunning = true
+        state.isRepeating = snapshot.isRepeating
         applyStatus(snapshot.status)
         // "Fermo, nessun brano" arriva anche mentre Spotify si sta chiudendo: si tiene l'ultimo brano.
         guard let track = snapshot.track else {
